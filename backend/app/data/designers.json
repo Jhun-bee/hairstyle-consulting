@@ -1,0 +1,77 @@
+[
+    {
+        "id": "d_01",
+        "name": "Cha Hong",
+        "salon_name": "Ardor Academy",
+        "location": {
+            "lat": 37.5172,
+            "lon": 127.0473
+        },
+        "specialty": [
+            "Hush Cut",
+            "Build Perm"
+        ],
+        "description": "Master of soft and feminine cuts.",
+        "image_url": "https://placehold.co/100x100?text=Cha"
+    },
+    {
+        "id": "d_02",
+        "name": "Kiu Teacher",
+        "salon_name": "Kiu Design",
+        "location": {
+            "lat": 37.5045,
+            "lon": 127.0490
+        },
+        "specialty": [
+            "Hippie Perm",
+            "Sleek Bun"
+        ],
+        "description": "Trendy styles and unique perms.",
+        "image_url": "https://placehold.co/100x100?text=Kiu"
+    },
+    {
+        "id": "d_03",
+        "name": "Evan Show",
+        "salon_name": "Evan Men's",
+        "location": {
+            "lat": 37.4981,
+            "lon": 127.0276
+        },
+        "specialty": [
+            "See-Through Dandy Cut",
+            "Guile Cut"
+        ],
+        "description": "Men's specialized consulting.",
+        "image_url": "https://placehold.co/100x100?text=Evan"
+    },
+    {
+        "id": "d_04",
+        "name": "Haum",
+        "salon_name": "Haum Chungdam",
+        "location": {
+            "lat": 37.5250,
+            "lon": 127.0400
+        },
+        "specialty": [
+            "Leaf Cut",
+            "Drop Cut"
+        ],
+        "description": "Sophisticated and clean cuts.",
+        "image_url": "https://placehold.co/100x100?text=Haum"
+    },
+    {
+        "id": "d_05",
+        "name": "Myo Jeong",
+        "salon_name": "Myo Bread",
+        "location": {
+            "lat": 37.5120,
+            "lon": 127.0590
+        },
+        "specialty": [
+            "Tassel Cut",
+            "Shadow Perm"
+        ],
+        "description": "Short hair expert.",
+        "image_url": "https://placehold.co/100x100?text=Myo"
+    }
+]

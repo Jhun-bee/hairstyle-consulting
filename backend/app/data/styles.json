@@ -1,0 +1,192 @@
+[
+    {
+        "id": "m_01",
+        "name": "시스루 댄디컷",
+        "gender": "male",
+        "tags": [
+            "트렌디",
+            "부드러움",
+            "이마커버",
+            "긴얼굴형추천"
+        ],
+        "face_shape_match": [
+            "oval",
+            "long",
+            "diamond"
+        ],
+        "description": "이마를 살짝 가리면서도 답답하지 않게 연출하는 스타일. 부드럽고 훈훈한 인상을 주며, 긴 얼굴형 보완에 탁월합니다.",
+        "prompt_modifier": "Korean see-through dandy cut hairstyle, soft texture, covering forehead lightly, neat sides, dark brown natural hair color, photorealistic, 8k",
+        "image_url": "/thumb_dandy_cut.png"
+    },
+    {
+        "id": "m_02",
+        "name": "드롭컷",
+        "gender": "male",
+        "tags": [
+            "깔끔함",
+            "남성미",
+            "짧은머리",
+            "둥근얼굴형추천"
+        ],
+        "face_shape_match": [
+            "round",
+            "square",
+            "oval"
+        ],
+        "description": "아이비리그컷과 크롭컷의 장점을 합친 스타일. 양옆은 누르고 앞머리 가운데를 살짝 떨어뜨려 M자 이마 보완과 동시에 샤프한 이미지를 줍니다.",
+        "prompt_modifier": "Drop cut hairstyle, short textured fringe dropping down, high skin fade on sides, masculine and sharp look, black hair, photorealistic",
+        "image_url": "/thumb_drop_cut.png"
+    },
+    {
+        "id": "m_03",
+        "name": "리프컷",
+        "gender": "male",
+        "tags": [
+            "예술적",
+            "분위기",
+            "가르마",
+            "각진얼굴형추천"
+        ],
+        "face_shape_match": [
+            "diamond",
+            "triangle",
+            "oval"
+        ],
+        "description": "나뭇잎이 흐르는 듯한 실루엣의 긴 머리 스타일. 광대와 턱선을 부드럽게 감싸주어 각진 얼굴형을 보완하고 분위기 있는 연출이 가능합니다.",
+        "prompt_modifier": "Leaf cut hairstyle, 5:5 parting, hair flowing naturally to the sides like a leaf shape, volume on top, soft perm texture, dark brown",
+        "image_url": "/thumb_leaf_cut.png"
+    },
+    {
+        "id": "m_04",
+        "name": "가일컷",
+        "gender": "male",
+        "tags": [
+            "포멀",
+            "섹시",
+            "한쪽넘김",
+            "각진얼굴형추천"
+        ],
+        "face_shape_match": [
+            "square",
+            "oval",
+            "round"
+        ],
+        "description": "한쪽은 시원하게 넘기고 한쪽은 자연스럽게 내리는 하이브리드 스타일. 정장과 캐주얼 모두 잘 어울리며 남성적인 매력을 강조합니다.",
+        "prompt_modifier": "Guile cut hairstyle, one side swept back, one side comma bang dropping, wet styling product finish, sharp jawline accent, black hair",
+        "image_url": "/thumb_guile_cut.png"
+    },
+    {
+        "id": "m_05",
+        "name": "쉐도우펌",
+        "gender": "male",
+        "tags": [
+            "귀여움",
+            "볼륨",
+            "캐주얼",
+            "긴얼굴형추천"
+        ],
+        "face_shape_match": [
+            "long",
+            "oval",
+            "heart"
+        ],
+        "description": "S컬 웨이브가 그림자처럼 흐르는 펌 스타일. 전체적인 볼륨감을 주어 얼굴이 작아 보이고, 멍뭉미 넘치는 귀여운 이미지를 연출합니다.",
+        "prompt_modifier": "Shadow perm hairstyle, messy s-curl texture, voluminous top, covering forehead, cozy and casual look, warm brown hair",
+        "image_url": "https://placehold.co/400x600?text=Shadow+Perm"
+    },
+    {
+        "id": "w_01",
+        "name": "허쉬컷",
+        "gender": "female",
+        "tags": [
+            "힙함",
+            "가벼움",
+            "레이어드",
+            "둥근얼굴형추천"
+        ],
+        "face_shape_match": [
+            "round",
+            "square",
+            "heart"
+        ],
+        "description": "층을 많이 내어 가볍고 힙한 느낌을 주는 중단발 스타일. 목선이 감싸지면서 턱선이 갸름해 보이는 효과가 있어 둥근 얼굴형에 강력 추천합니다.",
+        "prompt_modifier": "Hush cut hairstyle, medium length, high layers, airy texture, hugging the neck, see-through bangs, ash brown color, chic mood",
+        "image_url": "/thumb_hush_cut.png"
+    },
+    {
+        "id": "w_02",
+        "name": "빌드펌",
+        "gender": "female",
+        "tags": [
+            "우아함",
+            "데일리",
+            "C컬S컬",
+            "긴얼굴형추천"
+        ],
+        "face_shape_match": [
+            "long",
+            "oval",
+            "square"
+        ],
+        "description": "C컬과 S컬을 믹스하여 자연스럽게 쌓아 올린 듯한 펌. 가장 호불호 없는 여신 머리로, 옆광대를 커버하고 우아한 분위기를 자아냅니다.",
+        "prompt_modifier": "Build perm hairstyle, medium-long length, c-curl ends, side bangs flowing back, feminine and elegant, chocolate brown hair",
+        "image_url": "/thumb_build_perm.png"
+    },
+    {
+        "id": "w_03",
+        "name": "히피펌",
+        "gender": "female",
+        "tags": [
+            "보헤미안",
+            "빈티지",
+            "컬리",
+            "각진얼굴형추천"
+        ],
+        "face_shape_match": [
+            "diamond",
+            "oval",
+            "long"
+        ],
+        "description": "뿌리부터 뽀글뽀글한 컬이 들어간 레트로 스타일. 개성 있고 자유분방한 느낌을 주며, 시선을 분산시켜 각진 얼굴형을 부드럽게 만듭니다.",
+        "prompt_modifier": "Hippie perm hairstyle, long hair, tight curls from roots to tips, bohemian vintage look, volume, fuzzy texture, dark brown",
+        "image_url": "/thumb_hippie_perm.png"
+    },
+    {
+        "id": "w_04",
+        "name": "슬릭번 (로우번)",
+        "gender": "female",
+        "tags": [
+            "깔끔함",
+            "모던",
+            "묶음머리",
+            "계란형추천"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round",
+            "heart"
+        ],
+        "description": "잔머리 없이 깔끔하게 빗어 넘겨 낮게 묶은 스타일. 두상이 예뻐 보이고 세련된 도시적인 이미지를 줍니다. 일명 '까치머리' 디테일이 포인트.",
+        "prompt_modifier": "Sleek bun hairstyle, tightly tied low bun, distinct parting, glossy finish, modern and chic, small side hairs (sessam hairs), black hair",
+        "image_url": "/thumb_sleek_bun.png"
+    },
+    {
+        "id": "w_05",
+        "name": "태슬컷",
+        "gender": "female",
+        "tags": [
+            "시크",
+            "똑단발",
+            "직선",
+            "하트형추천"
+        ],
+        "face_shape_match": [
+            "heart",
+            "oval",
+            "round"
+        ],
+        "description": "끝 처리가 가벼운 일자 단발 스타일. 도회적이고 시크한 매력이 있으며, 목선이 길어 보이고 이목구비가 뚜렷해 보입니다.",
+        "prompt_modifier": "Tassel cut hairstyle, short straight bob, razor cut ends, no volume on sides, sleek and urban, platinum blonde or black hair",
+        "image_url": "/thumb_tassel_cut.png"
+    }
+]

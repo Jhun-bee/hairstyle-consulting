@@ -13,6 +13,8 @@ backend/.env
 backend/venv/
 backend/env/
 backend/.pytest_cache/
+backend/uploads/
+backend/results/
 
 # Node / Frontend
 frontend/node_modules/
