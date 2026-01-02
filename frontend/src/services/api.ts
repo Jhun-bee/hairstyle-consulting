@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api/consultant';
+// Dynamic API URL - uses current hostname so it works on LAN
+const API_HOST = window.location.hostname || 'localhost';
+const API_BASE_URL = `http://${API_HOST}:8000/api/consultant`;
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
@@ -40,8 +42,10 @@ export const analyzeFace = async (file: File) => {
     return response.data;
 };
 
-export const recommendStyles = async (analysis: FaceAnalysisResult) => {
-    const response = await api.post<RecommendationResponse>('/recommend', analysis);
+export const recommendStyles = async (analysis: FaceAnalysisResult, genderFilter: string = 'all') => {
+    const response = await api.post<RecommendationResponse>('/recommend', analysis, {
+        params: { gender_filter: genderFilter }
+    });
     return response.data;
 };
 

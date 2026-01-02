@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { recommendStyles, FaceAnalysisResult, Style } from '../services/api';
-import { Loader2, Check, Home, ArrowLeft, Sparkles } from 'lucide-react';
+import { Loader2, Check, Home, ArrowLeft, Sparkles, Heart } from 'lucide-react';
 
 const RecommendationPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const previewRef = useRef<HTMLDivElement>(null); // Ref for scrolling
-    const { analysis, imagePreview } = location.state || {};
+    const { analysis, imagePreview, genderFilter = 'all' } = location.state || {};
 
     const [recommendations, setRecommendations] = useState<Style[]>([]);
     const [comment, setComment] = useState<string>("");
@@ -31,7 +31,8 @@ const RecommendationPage = () => {
 
         const fetchRecommendations = async () => {
             try {
-                const result = await recommendStyles(analysis as FaceAnalysisResult);
+                // Pass gender filter to API
+                const result = await recommendStyles(analysis as FaceAnalysisResult, genderFilter);
                 setRecommendations(result.recommendations);
                 setComment(result.consultant_comment);
                 setIsLoading(false);
@@ -43,7 +44,7 @@ const RecommendationPage = () => {
         };
 
         fetchRecommendations();
-    }, [analysis, navigate]);
+    }, [analysis, navigate, genderFilter]);
 
     const handleTryOn = () => {
         if (selectedStyle) {
@@ -80,13 +81,22 @@ const RecommendationPage = () => {
                 >
                     <ArrowLeft className="w-6 h-6 text-white" />
                 </button>
-                <button
-                    onClick={() => navigate('/')}
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all"
-                >
-                    <Home className="w-6 h-6 text-white" />
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => navigate('/mystyles')}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all"
+                    >
+                        <Heart className="w-6 h-6 text-white" />
+                    </button>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all"
+                    >
+                        <Home className="w-6 h-6 text-white" />
+                    </button>
+                </div>
             </div>
+
             {/* Analysis Summary */}
             <div className="glass-panel p-4 mb-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -137,7 +147,6 @@ const RecommendationPage = () => {
                     ))}
                 </div>
 
-                {/* 2. Preview Panel (Appears when selected) */}
                 {/* 2. Preview Panel (Appears when selected) */}
                 <div ref={previewRef} className="glass-panel p-6 border-t border-white/10 mt-2">
                     <h4 className="font-bold text-center mb-6 text-accent text-lg">

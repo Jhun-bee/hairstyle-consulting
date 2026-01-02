@@ -19,5 +19,5 @@ httpx==0.28.1
 # Google Gemini AI
 google-genai==1.56.0
 
-# Image Processing
+# Image Processing (also used for photo booth composition)
 pillow==12.0.0

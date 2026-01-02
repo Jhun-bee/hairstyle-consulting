@@ -7,6 +7,7 @@ import LandingPage from './pages/LandingPage';
 import AnalysisPage from './pages/AnalysisPage';
 import RecommendationPage from './pages/RecommendationPage';
 import ResultPage from './pages/ResultPage';
+import MyStylePage from './pages/MyStylePage';
 
 function AnimatedRoutes() {
     const location = useLocation();
@@ -17,6 +18,7 @@ function AnimatedRoutes() {
                 <Route path="/analyze" element={<AnalysisPage />} />
                 <Route path="/recommend" element={<RecommendationPage />} />
                 <Route path="/result" element={<ResultPage />} />
+                <Route path="/mystyles" element={<MyStylePage />} />
             </Routes>
         </AnimatePresence>
     );

@@ -16,6 +16,12 @@ backend/.pytest_cache/
 backend/uploads/
 backend/results/
 
+# Debug/Test scripts (temporary development files)
+backend/check_models*.py
+backend/inspect_*.py
+backend/test_*.py
+backend/debug_*.py
+
 # Node / Frontend
 frontend/node_modules/
 frontend/dist/

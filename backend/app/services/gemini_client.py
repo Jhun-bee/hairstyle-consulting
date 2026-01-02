@@ -261,4 +261,346 @@ class GeminiClient:
             # Fallback
             return "https://placehold.co/400x600?text=Fitting+Service+Unavailable"
 
+    async def generate_time_change(self, user_image_path: str, style_name: str) -> dict:
+        """
+        Generates hair growth simulation images for 1month, 3months, 1year.
+        Returns: {"1month": url, "3months": url, "1year": url}
+        """
+        results = {}
+        time_periods = [
+            ("1month", "1개월 후", "slightly longer, about 1-2cm more growth"),
+            ("3months", "3개월 후", "noticeably longer, about 3-5cm more growth"),
+            ("1year", "1년 후", "significantly longer, about 12-15cm more growth")
+        ]
+        
+        try:
+            from PIL import ImageOps
+            original_img = Image.open(user_image_path)
+            original_img = ImageOps.exif_transpose(original_img)
+            
+            for key, korean_label, growth_desc in time_periods:
+                prompt = f"""
+                Show how this hairstyle "{style_name}" would look after hair growth.
+                Time passed: {korean_label} ({growth_desc})
+                
+                RULES:
+                1. Keep the same face, skin tone, and facial features EXACTLY.
+                2. The hairstyle should be the same style but with natural hair growth.
+                3. Keep the original hair color - do NOT change it.
+                4. Photorealistic, high quality output.
+                5. Same image orientation and angle as input.
+                """
+                
+                response = self.client.models.generate_content(
+                    model=self.imagen_model_id,
+                    contents=[prompt, original_img],
+                    config=types.GenerateContentConfig(
+                        response_modalities=["image", "text"],
+                    )
+                )
+                
+                if response.candidates and response.candidates[0].content.parts:
+                    for part in response.candidates[0].content.parts:
+                        if hasattr(part, 'inline_data') and part.inline_data:
+                            filename = f"time_{key}_{os.urandom(4).hex()}.png"
+                            save_path = os.path.join("results", filename)
+                            os.makedirs("results", exist_ok=True)
+                            with open(save_path, 'wb') as f:
+                                f.write(part.inline_data.data)
+                            results[key] = f"/results/{filename}"
+                            break
+                
+                if key not in results:
+                    results[key] = "https://placehold.co/400x600?text=Generation+Failed"
+                    
+        except Exception as e:
+            print(f"Error in time change generation: {e}")
+            import traceback
+            traceback.print_exc()
+            for key, _, _ in time_periods:
+                if key not in results:
+                    results[key] = "https://placehold.co/400x600?text=Error"
+        
+        return results
+
+    async def generate_multi_angle(self, user_image_path: str, style_name: str) -> dict:
+        """
+        Generates 4 angle views: front, left, right, back.
+        Returns: {"front": url, "left": url, "right": url, "back": url}
+        """
+        results = {}
+        angles = [
+            ("front", "정면", "front view, looking directly at camera"),
+            ("left", "왼쪽 옆모습", "left side profile view, 90 degrees to the left"),
+            ("right", "오른쪽 옆모습", "right side profile view, 90 degrees to the right"),
+            ("back", "뒷모습", "back view, showing the back of the head")
+        ]
+        
+        try:
+            from PIL import ImageOps
+            original_img = Image.open(user_image_path)
+            original_img = ImageOps.exif_transpose(original_img)
+            
+            for key, korean_label, angle_desc in angles:
+                prompt = f"""
+                Show this EXACT person with the EXACT same hairstyle from a different viewing angle.
+                Requested Angle: {korean_label} ({angle_desc})
+                
+                CRITICAL HAIR CONSISTENCY RULES:
+                1. The hairstyle MUST be EXACTLY the same as shown in the input image.
+                2. If the hair is down/loose in the input, it MUST remain down/loose from all angles.
+                3. DO NOT add ponytails, buns, braids, or any hair accessories that are not in the input.
+                4. DO NOT change the hair length, volume, or texture.
+                5. Hair color must remain EXACTLY the same.
+                6. The hairstyle "{style_name}" characteristics must be consistent from all angles.
+                
+                OTHER RULES:
+                7. Keep the same person's face, skin tone, and body EXACTLY.
+                8. Only change the viewing angle to: {angle_desc}.
+                9. Photorealistic, high quality output with consistent lighting.
+                10. Same clothing and background style.
+                """
+                
+                response = self.client.models.generate_content(
+                    model=self.imagen_model_id,
+                    contents=[prompt, original_img],
+                    config=types.GenerateContentConfig(
+                        response_modalities=["image", "text"],
+                    )
+                )
+                
+                if response.candidates and response.candidates[0].content.parts:
+                    for part in response.candidates[0].content.parts:
+                        if hasattr(part, 'inline_data') and part.inline_data:
+                            filename = f"angle_{key}_{os.urandom(4).hex()}.png"
+                            save_path = os.path.join("results", filename)
+                            os.makedirs("results", exist_ok=True)
+                            with open(save_path, 'wb') as f:
+                                f.write(part.inline_data.data)
+                            results[key] = f"/results/{filename}"
+                            break
+                
+                if key not in results:
+                    results[key] = "https://placehold.co/400x600?text=Generation+Failed"
+                    
+        except Exception as e:
+            print(f"Error in multi-angle generation: {e}")
+            import traceback
+            traceback.print_exc()
+            for key, _, _ in angles:
+                if key not in results:
+                    results[key] = "https://placehold.co/400x600?text=Error"
+        
+        return results
+
+    async def generate_pose(self, user_image_path: str, style_name: str, scene_type: str) -> dict:
+        """
+        Generates 6 photoshoot-style images based on scene type with unique poses.
+        scene_type: "studio" | "outdoor" | "runway"
+        Returns: {"images": [url1, url2, url3, url4, url5, url6]}
+        """
+        # Each prompt has a unique pose description to ensure variety
+        scene_configs = {
+            "studio": {
+                "name": "스튜디오",
+                "prompts": [
+                    "professional studio portrait, soft lighting, neutral backdrop, POSE: looking directly at camera with confident smile",
+                    "dramatic studio lighting, dark background, fashion editorial, POSE: side profile view, chin slightly up",
+                    "bright high-key studio, white background, beauty shot, POSE: head tilted, looking over shoulder",
+                    "artistic studio with colored gel lights, creative portrait, POSE: sitting pose, relaxed posture",
+                    "classic black and white studio portrait, timeless elegance, POSE: looking down with closed eyes, peaceful expression",
+                    "cinematic studio lighting, moody atmosphere, POSE: looking upward, aspirational expression"
+                ]
+            },
+            "outdoor": {
+                "name": "야외",
+                "prompts": [
+                    "golden hour outdoor portrait, warm sunlight, natural bokeh, POSE: walking towards camera, candid movement",
+                    "urban street style, city background, lifestyle shot, POSE: leaning against wall, casual cool pose",
+                    "beach setting, ocean breeze, relaxed summer vibe, POSE: sitting on sand, looking at horizon",
+                    "autumn park, colorful fall leaves, romantic atmosphere, POSE: spinning with arms slightly out, joyful movement",
+                    "rooftop at sunset, city skyline, trendy urban portrait, POSE: side view looking into distance, contemplative",
+                    "cafe terrace, european vibes, natural daylight, POSE: seated at table, hand on chin, thoughtful"
+                ]
+            },
+            "runway": {
+                "name": "런웨이",
+                "prompts": [
+                    "FASHION RUNWAY CATWALK, actual runway with audience on both sides, dramatic catwalk lighting, POSE: mid-stride walking down the runway, confident model walk",
+                    "FASHION RUNWAY CATWALK, long white runway with spotlights, fashion show atmosphere, POSE: standing at end of runway, powerful stance facing camera",
+                    "FASHION RUNWAY CATWALK, modern minimalist runway stage, professional fashion photography, POSE: turning at runway end, elegant pivot movement",
+                    "FASHION RUNWAY CATWALK, luxury fashion week setting, dramatic overhead lighting, POSE: walking towards camera on runway, fierce expression",
+                    "FASHION RUNWAY CATWALK, sleek black runway with dramatic lighting, high fashion atmosphere, POSE: profile view walking on runway, elongated silhouette",
+                    "FASHION RUNWAY CATWALK, premium fashion show runway, designer lighting setup, POSE: runway finale pose, arms at sides, commanding presence"
+                ]
+            }
+        }
+        
+        config = scene_configs.get(scene_type, scene_configs["studio"])
+        results = {"images": []}
+        
+        try:
+            from PIL import ImageOps
+            original_img = Image.open(user_image_path)
+            original_img = ImageOps.exif_transpose(original_img)
+            
+            for i, scene_prompt in enumerate(config["prompts"]):
+                prompt = f"""
+                Create a stunning photoshoot image of this person with hairstyle "{style_name}".
+                Scene: {scene_prompt}
+                
+                RULES:
+                1. Keep the same person's face and identity EXACTLY.
+                2. Apply the hairstyle "{style_name}" perfectly styled for this scene.
+                3. Create a professional, magazine-quality photograph.
+                4. Match the lighting and mood to the scene description.
+                5. The person should have a natural, confident pose.
+                6. Keep the original hair color.
+                7. High resolution, photorealistic output.
+                """
+                
+                response = self.client.models.generate_content(
+                    model=self.imagen_model_id,
+                    contents=[prompt, original_img],
+                    config=types.GenerateContentConfig(
+                        response_modalities=["image", "text"],
+                    )
+                )
+                
+                if response.candidates and response.candidates[0].content.parts:
+                    for part in response.candidates[0].content.parts:
+                        if hasattr(part, 'inline_data') and part.inline_data:
+                            filename = f"pose_{scene_type}_{i}_{os.urandom(4).hex()}.png"
+                            save_path = os.path.join("results", filename)
+                            os.makedirs("results", exist_ok=True)
+                            with open(save_path, 'wb') as f:
+                                f.write(part.inline_data.data)
+                            results["images"].append(f"/results/{filename}")
+                            break
+                
+                # Fallback for this image
+                if len(results["images"]) <= i:
+                    results["images"].append("https://placehold.co/400x600?text=Generation+Failed")
+                    
+        except Exception as e:
+            print(f"Error in pose generation: {e}")
+            import traceback
+            traceback.print_exc()
+            while len(results["images"]) < 6:
+                results["images"].append("https://placehold.co/400x600?text=Error")
+        
+        return results
+
+    async def generate_photo_booth(self, image_urls: list, style_name: str) -> str:
+        """
+        Composites 3 images into a photo booth strip layout (인생세컷).
+        Uses Pillow for image composition.
+        Returns: URL of the composed image
+        """
+        from PIL import Image as PILImage, ImageDraw, ImageFont
+        from datetime import datetime
+        import io
+        import requests as req
+        
+        try:
+            # Configuration
+            cell_width = 400
+            cell_height = 500
+            padding = 20
+            footer_height = 80
+            
+            # Total dimensions
+            total_width = cell_width + padding * 2
+            total_height = cell_height * 3 + padding * 4 + footer_height
+            
+            # Create canvas with white background
+            canvas = PILImage.new('RGB', (total_width, total_height), '#FFFFFF')
+            draw = ImageDraw.Draw(canvas)
+            
+            # Load and place each image
+            y_offset = padding
+            for i, img_url in enumerate(image_urls[:3]):
+                try:
+                    # Handle local file paths
+                    if img_url.startswith('/results/'):
+                        img_path = os.path.join("results", img_url.replace('/results/', ''))
+                        img = PILImage.open(img_path)
+                    else:
+                        # Remote URL
+                        response = req.get(img_url)
+                        img = PILImage.open(io.BytesIO(response.content))
+                    
+                    # Resize to fit cell
+                    img = img.convert('RGB')
+                    img.thumbnail((cell_width, cell_height), PILImage.Resampling.LANCZOS)
+                    
+                    # Center in cell
+                    x_pos = padding + (cell_width - img.width) // 2
+                    y_pos = y_offset + (cell_height - img.height) // 2
+                    
+                    canvas.paste(img, (x_pos, y_pos))
+                    
+                except Exception as e:
+                    print(f"Error loading image {i}: {e}")
+                    # Draw placeholder
+                    draw.rectangle([padding, y_offset, padding + cell_width, y_offset + cell_height], 
+                                   fill='#F0F0F0', outline='#CCCCCC')
+                
+                y_offset += cell_height + padding
+            
+            # Footer with branding
+            footer_y = y_offset
+            draw.rectangle([0, footer_y, total_width, total_height], fill='#1a1a2e')
+            
+            # Try to use Korean-compatible fonts on Windows
+            title_font = None
+            date_font = None
+            font_candidates = [
+                "malgun.ttf",      # Windows 맑은 고딕
+                "malgunbd.ttf",    # Windows 맑은 고딕 Bold
+                "NanumGothic.ttf", # Nanum Gothic
+                "gulim.ttc",       # Windows 굴림
+                "batang.ttc",      # Windows 바탕
+                "C:/Windows/Fonts/malgun.ttf",
+                "C:/Windows/Fonts/NanumGothic.ttf",
+            ]
+            
+            for font_path in font_candidates:
+                try:
+                    title_font = ImageFont.truetype(font_path, 24)
+                    date_font = ImageFont.truetype(font_path, 16)
+                    break
+                except:
+                    continue
+            
+            if title_font is None:
+                title_font = ImageFont.load_default()
+                date_font = ImageFont.load_default()
+            
+            # Title (without emojis for font compatibility)
+            title_text = f"- {style_name} -"
+            title_bbox = draw.textbbox((0, 0), title_text, font=title_font)
+            title_x = (total_width - (title_bbox[2] - title_bbox[0])) // 2
+            draw.text((title_x, footer_y + 15), title_text, fill='white', font=title_font)
+            
+            # Date
+            date_text = datetime.now().strftime("%Y.%m.%d")
+            date_bbox = draw.textbbox((0, 0), date_text, font=date_font)
+            date_x = (total_width - (date_bbox[2] - date_bbox[0])) // 2
+            draw.text((date_x, footer_y + 48), date_text, fill='#888888', font=date_font)
+            
+            # Save
+            filename = f"photobooth_{os.urandom(4).hex()}.png"
+            save_path = os.path.join("results", filename)
+            os.makedirs("results", exist_ok=True)
+            canvas.save(save_path, 'PNG', quality=95)
+            
+            return f"/results/{filename}"
+            
+        except Exception as e:
+            print(f"Error in photo booth generation: {e}")
+            import traceback
+            traceback.print_exc()
+            return "https://placehold.co/400x1600?text=Photo+Booth+Failed"
+
 client = GeminiClient()

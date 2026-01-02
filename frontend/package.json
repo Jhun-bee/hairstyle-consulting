@@ -1,7 +1,7 @@
 {
     "name": "hair-consulting-frontend",
     "private": true,
-    "version": "1.0.0",
+    "version": "0.3.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -16,7 +16,10 @@
         "framer-motion": "^12.23.26",
         "lucide-react": "^0.562.0",
         "react-icons": "^5.5.0",
-        "react-router-dom": "^7.11.0"
+        "react-router-dom": "^7.11.0",
+        "three": "^0.170.0",
+        "@react-three/fiber": "^8.15.0",
+        "@react-three/drei": "^9.92.0"
     },
     "devDependencies": {
         "@types/react": "^18.2.15",

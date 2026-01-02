@@ -1,29 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Upload, Loader2, ScanFace, ArrowLeft, Home, X } from 'lucide-react';
+import { Upload, Loader2, ScanFace, ArrowLeft, Home, X, Heart } from 'lucide-react';
 import { analyzeFace } from '../services/api';
+
+type GenderFilter = 'all' | 'female' | 'male';
 
 const AnalysisPage = () => {
     const navigate = useNavigate();
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [genderFilter, setGenderFilter] = useState<GenderFilter>('all');
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setSelectedImage(file);
             setPreviewUrl(URL.createObjectURL(file));
-            setError(null);
         }
     };
 
     const handleRemoveImage = () => {
         setSelectedImage(null);
         setPreviewUrl(null);
-        setError(null);
     };
 
     const handleAnalyze = async () => {
@@ -32,16 +32,17 @@ const AnalysisPage = () => {
         setIsLoading(true);
         try {
             const result = await analyzeFace(selectedImage);
-            // Navigate to next page with state
+            // Navigate to next page with state including gender filter
             navigate('/recommend', {
                 state: {
                     analysis: result,
-                    imagePreview: previewUrl
+                    imagePreview: previewUrl,
+                    genderFilter: genderFilter
                 }
             });
         } catch (err) {
             console.error(err);
-            setError("Failed to analyze image. Please try again.");
+            alert("Failed to analyze image. Please try again.");
             setIsLoading(false);
         }
     };
@@ -57,12 +58,20 @@ const AnalysisPage = () => {
                 >
                     <ArrowLeft className="w-6 h-6 text-white" />
                 </button>
-                <button
-                    onClick={() => navigate('/')}
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all"
-                >
-                    <Home className="w-6 h-6 text-white" />
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => navigate('/mystyles')}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all"
+                    >
+                        <Heart className="w-6 h-6 text-white" />
+                    </button>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all"
+                    >
+                        <Home className="w-6 h-6 text-white" />
+                    </button>
+                </div>
             </div>
 
             <div className="w-full text-center space-y-2 mb-8">
@@ -113,14 +122,35 @@ const AnalysisPage = () => {
                 )}
             </div>
 
+            {/* Gender Filter Toggle */}
+            <div className="w-full mb-6">
+                <p className="text-sm text-gray-400 mb-2 text-center">추천 스타일 필터</p>
+                <div className="flex justify-center gap-3">
+                    {(['all', 'female', 'male'] as GenderFilter[]).map((filter) => (
+                        <button
+                            key={filter}
+                            onClick={() => setGenderFilter(filter)}
+                            className={`px-6 py-3 rounded-full text-base font-bold transition-all shadow-lg ${genderFilter === filter
+                                ? 'bg-[#3B82F6] text-white shadow-blue-500/30 scale-105'
+                                : 'bg-[#1F2937] text-gray-400 hover:bg-gray-700'
+                                }`}
+                        >
+                            {filter === 'all' && '전체'}
+                            {filter === 'female' && '♀ 여성'}
+                            {filter === 'male' && '♂ 남성'}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* Action Button */}
             <div className="w-full mt-auto pb-8">
                 <button
                     onClick={handleAnalyze}
                     disabled={!selectedImage || isLoading}
                     className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center space-x-2 transition-all ${!selectedImage
-                            ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                            : 'bg-white text-black hover:scale-[1.02] shadow-lg shadow-blue-500/20'
+                        ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                        : 'bg-white text-black hover:scale-[1.02] shadow-lg shadow-blue-500/20'
                         }`}
                 >
                     {isLoading ? (
@@ -139,11 +169,5 @@ const AnalysisPage = () => {
         </div>
     );
 };
-
-const SparklesIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-    </svg>
-);
 
 export default AnalysisPage;
