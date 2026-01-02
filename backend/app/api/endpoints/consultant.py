@@ -40,14 +40,23 @@ async def analyze_face(file: UploadFile = File(...)):
     return result
 
 @router.post("/recommend")
-async def recommend_style(analysis: FaceAnalysisResult):
-    # LLM Recommendation
-    rec_result = await client.recommend_styles_with_llm(analysis.model_dump(), STYLES_DB)
+async def recommend_style(analysis: FaceAnalysisResult, gender_filter: str = "all"):
+    # Filter styles by gender if specified
+    # Style IDs: m_XX = male, w_XX = female
+    if gender_filter == "male":
+        filtered_styles = [s for s in STYLES_DB if s['id'].startswith('m_')]
+    elif gender_filter == "female":
+        filtered_styles = [s for s in STYLES_DB if s['id'].startswith('w_')]
+    else:
+        filtered_styles = STYLES_DB
+    
+    # LLM Recommendation with filtered styles
+    rec_result = await client.recommend_styles_with_llm(analysis.model_dump(), filtered_styles)
     
     try:
         recommendations = []
         for pid in rec_result.get('recommended_style_ids', []):
-            style = next((s for s in STYLES_DB if s['id'] == pid), None)
+            style = next((s for s in filtered_styles if s['id'] == pid), None)
             if style:
                 recommendations.append(style)
         

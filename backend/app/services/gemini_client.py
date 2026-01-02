@@ -182,16 +182,25 @@ class GeminiClient:
             print(f"DEBUG: Generating hairstyle with modifier: {prompt_modifier}")
             print(f"DEBUG: Original image path: {original_image_path}")
             
-            # Load the original user image
+            # Load the original user image and fix EXIF orientation (prevents 90 degree rotation)
+            from PIL import ImageOps
             original_img = Image.open(original_image_path)
+            original_img = ImageOps.exif_transpose(original_img)  # Fix rotation based on EXIF
             
-            # Craft a prompt using the user's requested structure
-            # Craft a simplified prompt for Nano Banana (2.5 Flash Image)
-            # Complex prompts often cause this lightweight model to return empty images (safety fallback or confusion)
+            # Enhanced prompt for better results:
+            # - Keep original hair COLOR (no dyeing)
+            # - Hair length must be SAME or SHORTER (no extensions/wigs)
+            # - Preserve face and orientation
             edit_prompt = f"""
-            Change the hairstyle of the person in this image to: {prompt_modifier}.
-            Important: Keep the face and facial features exactly the same. Only change the hair. 
-            Photorealistic, high quality.
+            Apply this hairstyle to the person: {prompt_modifier}.
+            
+            CRITICAL RULES:
+            1. Keep the ORIGINAL HAIR COLOR - do NOT change the hair color at all.
+            2. Hair length must be the SAME or SHORTER than the original - never longer.
+            3. Preserve the face, skin tone, and facial features exactly.
+            4. Keep the same image orientation and angle as the input.
+            5. PRESERVE ALL ACCESSORIES: Keep hats, caps, glasses, and earrings EXACTLY as they are. Do not remove or alter them.
+            6. Photorealistic, high quality output.
             """
             
             # Send both the image and the editing prompt
