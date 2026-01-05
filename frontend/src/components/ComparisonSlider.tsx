@@ -72,7 +72,12 @@ const ComparisonSlider: React.FC<ComparisonSliderProps> = ({ beforeImage, afterI
                 className="absolute inset-0 w-full h-full object-cover"
                 draggable={false}
             />
-            <div className="absolute top-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded font-bold z-10 pointer-events-none">After</div>
+            <div
+                className="absolute top-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded font-bold z-10 pointer-events-none transition-opacity duration-300"
+                style={{ opacity: position > 90 ? 0 : 1 }}
+            >
+                After
+            </div>
 
             {/* Before Image (Clipping Mask) */}
             <div
@@ -85,7 +90,12 @@ const ComparisonSlider: React.FC<ComparisonSliderProps> = ({ beforeImage, afterI
                     className="absolute inset-0 w-full h-full object-cover"
                     draggable={false}
                 />
-                <div className="absolute top-4 left-4 bg-black/50 text-white text-xs px-2 py-1 rounded font-bold z-10 pointer-events-none">Before</div>
+                <div
+                    className="absolute top-4 left-4 bg-black/50 text-white text-xs px-2 py-1 rounded font-bold z-10 pointer-events-none transition-opacity duration-300"
+                    style={{ opacity: position < 10 ? 0 : 1 }}
+                >
+                    Before
+                </div>
             </div>
 
             {/* Slider Handle */}

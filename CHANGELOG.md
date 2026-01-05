@@ -4,6 +4,24 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.5.0] - 2026-01-05
+
+### ✨ UI Overhaul
+- **Quick Fitting 스타일 선택 UI 전면 개편**:
+  - 3열 그리드 레이아웃 적용
+  - 스타일별 썸네일 이미지 적용 (친구 repo 리소스 활용)
+  - 카드형 디자인 및 텍스트 오버레이 적용
+- **DATA**:
+  - 남성/여성 헤어스타일 썸네일 이미지 보강 (`backend/uploads`)
+  - `styles.json`: 이미지 URL 매핑 업데이트
+- **UI/UX Enhancement**:
+  - Comparison Slider: 슬라이더 극단 이동 시 해당 라벨(Before/After) 숨김 처리하여 이미지 가림 방지
+- **Bug Fix**:
+  - Omakase(Consultant) 결과 페이지 썸네일 엑박 문제 수정 (이미지 경로 처리 로직 추가)
+  - Omakase 결과 화면에서 'Before(원본)' 이미지가 깨지는 문제 수정 (Blob URL 대신 서버 URL 사용)
+
+---
+
 ## [v0.4.3] - 2026-01-05
 
 ### ✨ Added

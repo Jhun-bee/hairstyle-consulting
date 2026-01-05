@@ -15,11 +15,16 @@ const QuickFittingPage = () => {
     const [imageId, setImageId] = useState<string | null>(null);
 
     const [gender, setGender] = useState<'male' | 'female'>('male');
-    const [styles, setStyles] = useState<{ male: string[], female: string[] }>({ male: [], female: [] });
+    // Updated type for styles
+    const [styles, setStyles] = useState<{ male: { name: string, image_url: string }[], female: { name: string, image_url: string }[] }>({ male: [], female: [] });
     const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
     const [isThinking, setIsThinking] = useState(false);
+    const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+
+    const API_HOST = window.location.hostname || 'localhost';
+    const BACKEND_URL = `http://${API_HOST}:8000`;
 
     // Restore state from URL params (when returning from result page)
     useEffect(() => {
@@ -55,7 +60,6 @@ const QuickFittingPage = () => {
     }, []);
 
     // Handlers
-    const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -87,9 +91,8 @@ const QuickFittingPage = () => {
         try {
             const res = await generateQuickFitting(imageId, selectedStyle, gender);
             // Use uploadedUrl from state (has correct extension from backend)
-            const API_HOST = window.location.hostname || 'localhost';
             const fullUploadedUrl = uploadedUrl?.startsWith('/')
-                ? `http://${API_HOST}:8000${uploadedUrl}`
+                ? `${BACKEND_URL}${uploadedUrl}`
                 : uploadedUrl;
             navigate(`/quick-result?id=${imageId}&url=${encodeURIComponent(fullUploadedUrl || '')}&resultUrl=${encodeURIComponent(res.result_image)}&style=${selectedStyle}&gender=${gender}`);
         } catch (err) {
@@ -183,19 +186,51 @@ const QuickFittingPage = () => {
                             ))}
                         </div>
 
-                        {/* Styles Grid */}
-                        <div className="grid grid-cols-2 gap-4 mb-20 overflow-y-auto pb-8 scrollbar-hide" style={{ maxHeight: '60vh' }}>
+                        {/* Styles Grid - Modified for 3 columns and images */}
+                        <div className="grid grid-cols-3 gap-3 mb-20 overflow-y-auto pb-8 scrollbar-hide px-1" style={{ maxHeight: '60vh' }}>
                             {styles[gender]?.map((style) => (
                                 <button
-                                    key={style}
-                                    onClick={() => setSelectedStyle(style)}
-                                    className={`p-4 rounded-2xl text-left transition-all border ${selectedStyle === style ? 'border-blue-500 bg-blue-500/10 shadow-blue-500/20 shadow-lg' : 'border-white/10 bg-white/5 hover:bg-white/10'
-                                        }`}
+                                    key={style.name}
+                                    onClick={() => setSelectedStyle(style.name)}
+                                    className={`relative aspect-[3/4] rounded-2xl overflow-hidden transition-all group ${selectedStyle === style.name ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900 scale-105' : 'hover:scale-105'}`}
                                 >
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 mb-3 flex items-center justify-center text-white font-bold text-lg">
-                                        {style.charAt(0)}
+                                    {/* Image Background */}
+                                    <div className="absolute inset-0 bg-gray-800">
+                                        {style.image_url ? (
+                                            <img
+                                                src={style.image_url.startsWith('http') ? style.image_url : `${BACKEND_URL}${style.image_url}`}
+                                                alt={style.name}
+                                                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                                loading="lazy"
+                                                onError={(e) => {
+                                                    // Fallback if image fails
+                                                    (e.target as HTMLImageElement).style.display = 'none';
+                                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                                }}
+                                            />
+                                        ) : null}
+                                        {/* Fallback Icon */}
+                                        <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 ${style.image_url ? 'hidden' : ''}`}>
+                                            <span className="text-2xl font-bold text-white/20">{style.name.charAt(0)}</span>
+                                        </div>
                                     </div>
-                                    <h4 className="text-white font-medium text-sm">{style}</h4>
+
+                                    {/* Gradient Overlay for Text Visibility */}
+                                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent" />
+
+                                    {/* Text Label */}
+                                    <div className="absolute bottom-0 left-0 right-0 p-2 text-center">
+                                        <span className="text-xs font-bold text-white leading-tight break-keep block shadow-sm">
+                                            {style.name}
+                                        </span>
+                                    </div>
+
+                                    {/* Selected Indicator */}
+                                    {selectedStyle === style.name && (
+                                        <div className="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                                            <Sparkles className="w-3 h-3 text-white" />
+                                        </div>
+                                    )}
                                 </button>
                             ))}
                         </div>

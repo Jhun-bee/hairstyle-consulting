@@ -15,6 +15,10 @@ const RecommendationPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
 
+    // Dynamic API URL
+    const API_HOST = window.location.hostname || 'localhost';
+    const BACKEND_URL = `http://${API_HOST}:8000`;
+
     const handleStyleSelect = (style: Style) => {
         setSelectedStyle(style);
         // Smooth scroll to preview on mobile/desktop
@@ -132,7 +136,7 @@ const RecommendationPage = () => {
                                 }`}
                         >
                             <img
-                                src={style.image_url}
+                                src={style.image_url.startsWith('http') ? style.image_url : `${BACKEND_URL}${style.image_url}`}
                                 alt={style.name}
                                 className="w-16 h-20 object-cover rounded-lg bg-gray-800 shrink-0"
                             />
@@ -168,7 +172,11 @@ const RecommendationPage = () => {
 
                                 {/* Style */}
                                 <div className="relative w-1/2 aspect-[3/4] rounded-lg overflow-hidden shadow-md border-2 border-accent/30">
-                                    <img src={selectedStyle.image_url} className="w-full h-full object-cover" alt="Style" />
+                                    <img
+                                        src={selectedStyle.image_url.startsWith('http') ? selectedStyle.image_url : `${BACKEND_URL}${selectedStyle.image_url}`}
+                                        className="w-full h-full object-cover"
+                                        alt="Style"
+                                    />
                                     <div className="absolute bottom-0 inset-x-0 bg-accent/90 text-black py-1 text-center text-xs font-bold">Target</div>
                                 </div>
                             </div>

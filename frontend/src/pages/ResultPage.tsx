@@ -140,6 +140,11 @@ export default function ResultPage() {
         }
     };
 
+    // Construct persistent URL for the before image
+    const beforeImageUrl = analysis?.file_id
+        ? `http://${API_HOST}:8000/uploads/${analysis.file_id}`
+        : (imagePreview || style.image_url);
+
     return (
         <div className="min-h-screen px-8 pt-20 max-w-md mx-auto flex flex-col relative pb-24">
             {/* Header */}
@@ -190,7 +195,7 @@ export default function ResultPage() {
                     ) : (
                         <div className="relative w-full h-full">
                             <ComparisonSlider
-                                beforeImage={imagePreview || style.image_url}
+                                beforeImage={beforeImageUrl}
                                 afterImage={resultImage || style.image_url}
                             />
 
