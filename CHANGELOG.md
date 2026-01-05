@@ -4,6 +4,13 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.4.2] - 2026-01-05
+
+### 🐛 Fixed
+- `main.py` 구문 오류 수정 (마크다운 코드블록 제거)
+
+---
+
 ## [v0.4.1] - 2026-01-05
 
 ### 🖼️ Added
