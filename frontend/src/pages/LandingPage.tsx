@@ -37,16 +37,16 @@ const LandingPage = () => {
 
                 {/* Mode B: Fitting Only */}
                 <button
-                    onClick={() => alert("Mode B coming soon!")} // Placeholder for Mode B
-                    className="group w-full glass-panel p-6 text-left hover:border-white/30 transition-all active:scale-95 opacity-50 cursor-not-allowed"
+                    onClick={() => navigate('/quick-fitting')}
+                    className="group w-full glass-panel p-6 text-left hover:border-white/30 transition-all active:scale-95"
                 >
                     <div className="flex items-center space-x-4 mb-2">
-                        <div className="bg-white/10 p-3 rounded-full">
+                        <div className="bg-white/10 p-3 rounded-full group-hover:bg-white/20 transition-colors">
                             <Camera className="w-6 h-6 text-white" />
                         </div>
                         <div>
                             <h3 className="text-xl font-bold text-white">Quick Fitting</h3>
-                            <p className="text-sm text-gray-400">Just Fitting (Coming Soon)</p>
+                            <p className="text-sm text-gray-400">Instant Style Change</p>
                         </div>
                     </div>
                 </button>

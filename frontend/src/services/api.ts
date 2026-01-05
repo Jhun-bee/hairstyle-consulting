@@ -53,3 +53,29 @@ export const virtualFitting = async (styleId: string) => {
     const response = await api.post('/fitting', null, { params: { style_id: styleId } });
     return response.data;
 };
+
+// Quick Fitting API (Ported)
+const GENERAL_API_BASE_URL = `http://${API_HOST}:8000/api`;
+export const generalApi = axios.create({
+    baseURL: GENERAL_API_BASE_URL,
+    headers: { 'Content-Type': 'application/json' },
+});
+
+export const getStyles = async () => {
+    const response = await generalApi.get('/styles');
+    return response.data;
+};
+
+export const generateQuickFitting = async (imageId: string, style: string, gender: string) => {
+    const response = await generalApi.post('/generate', { image_id: imageId, style, gender });
+    return response.data;
+};
+
+export const uploadImage = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await generalApi.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};

@@ -188,5 +188,685 @@
         "description": "끝 처리가 가벼운 일자 단발 스타일. 도회적이고 시크한 매력이 있으며, 목선이 길어 보이고 이목구비가 뚜렷해 보입니다.",
         "prompt_modifier": "Tassel cut hairstyle, short straight bob, razor cut ends, no volume on sides, sleek and urban, platinum blonde or black hair",
         "image_url": "/thumb_tassel_cut.png"
+    },
+    {
+        "id": "m_06",
+        "name": "시스루 애즈 펌 (2025 Trend)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean See-through As Perm.",
+        "prompt_modifier": "Korean See-through As Perm. A sophisticated mix of As Perm and See-through bangs. The forehead is slightly exposed (5:5 or 6:4 parting). The bangs are light and airy, not heavy. Soft, natural waves. Romantic K-drama lead actor style.",
+        "negative_prompt_modifier": "heavy bangs, stiff hair, greasy, tight curls",
+        "image_url": "https://placehold.co/400x600?text=시스루+애즈+펌+(2025+Trend)"
+    },
+    {
+        "id": "m_07",
+        "name": "필러스 컷 (Pillers Cut)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Pillers Cut.",
+        "prompt_modifier": "Korean Pillers Cut. A trendy high-volume style with a rectangular silhouette. The sides are slim (drop cut style), and the top has texture and volume. A mix of Ivy League and Flat Cut but more stylish and urban. Masculine but sophisticated.",
+        "negative_prompt_modifier": "round silhouette, flat top, military cut",
+        "image_url": "https://placehold.co/400x600?text=필러스+컷+(Pillers+Cut)"
+    },
+    {
+        "id": "m_08",
+        "name": "슬릭 댄디 컷",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Slick Dandy Cut.",
+        "prompt_modifier": "Korean Slick Dandy Cut. A modern dandy cut with a straightened, sleek texture. Minimal volume, very clean and sharp lines. The bangs fall straight down or slightly to the side. Chic, cold, and urban vibe.",
+        "negative_prompt_modifier": "messy, curly, voluminous, frizzy",
+        "image_url": "https://placehold.co/400x600?text=슬릭+댄디+컷"
+    },
+    {
+        "id": "m_09",
+        "name": "세미 리프 컷",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Semi Leaf Cut.",
+        "prompt_modifier": "Korean Semi Leaf Cut. A shorter, cleaner version of the Leaf Cut. Hair flows backwards naturally like a leaf. It covers the tops of the ears slightly. Texturized and airy. Natural K-pop idol vibe.",
+        "negative_prompt_modifier": "short hair, military style, heavy mullet",
+        "image_url": "https://placehold.co/400x600?text=세미+리프+컷"
+    },
+    {
+        "id": "m_10",
+        "name": "스핀스왈로 펌 (소프트)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Soft Spin Swallow Perm.",
+        "prompt_modifier": "Korean Soft Spin Swallow Perm. It has a rough, spiky texture but is NOT too curly or afro-like. The curls are random and loose, creating a 'swaggy' and messy-chic look. Volume is airy, not frizzy. Trendy street style.",
+        "negative_prompt_modifier": "afro, tight curls, broccoli hair, messy explosion",
+        "image_url": "https://placehold.co/400x600?text=스핀스왈로+펌+(소프트)"
+    },
+    {
+        "id": "m_11",
+        "name": "가일 컷",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Guile Cut.",
+        "prompt_modifier": "Korean Guile Cut. One side is a natural comma bang, the other is tucked behind the ear. Sharp and masculine. The texture is clean and semi-matte, not overly greasy pomade style. Park Seo-joon style.",
+        "negative_prompt_modifier": "messy, full bangs, long hair",
+        "image_url": "https://placehold.co/400x600?text=가일+컷"
+    },
+    {
+        "id": "m_12",
+        "name": "시스루 댄디 컷",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean See-through Dandy Cut.",
+        "prompt_modifier": "Korean See-through Dandy Cut. The most popular daily hairstyle in Korea. Soft bangs that lightly cover the forehead. Very natural and innocent look. Not too heavy.",
+        "negative_prompt_modifier": "heavy bowl cut, helmet hair, spiky",
+        "image_url": "https://placehold.co/400x600?text=시스루+댄디+컷"
+    },
+    {
+        "id": "m_13",
+        "name": "쉐도우 펌",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Shadow Perm.",
+        "prompt_modifier": "Korean Shadow Perm. S-curl waves that create shadow-like volume on top. The curls are soft and round, not tight. Cute and energetic younger brother vibe.",
+        "negative_prompt_modifier": "straight hair, flat, stiff curls",
+        "image_url": "https://placehold.co/400x600?text=쉐도우+펌"
+    },
+    {
+        "id": "m_14",
+        "name": "아이비리그 컷",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Ivy League Cut.",
+        "prompt_modifier": "Korean Ivy League Cut. Short sides, flat top, and front hair lifted naturally. It looks sporty and neat, not like a harsh military crew cut. Modern and smart.",
+        "negative_prompt_modifier": "long hair, messy, buzz cut",
+        "image_url": "https://placehold.co/400x600?text=아이비리그+컷"
+    },
+    {
+        "id": "m_15",
+        "name": "드롭 컷",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Drop Cut.",
+        "prompt_modifier": "Korean Drop Cut. Similar to Ivy League but the side bangs drop down to cover the M-line of the forehead. Sharp, trendy, and face-slimming effect.",
+        "negative_prompt_modifier": "long hair, messy",
+        "image_url": "https://placehold.co/400x600?text=드롭+컷"
+    },
+    {
+        "id": "m_16",
+        "name": "애즈 펌 (클래식)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Classic As Perm.",
+        "prompt_modifier": "Korean Classic As Perm. Natural center parting where the bangs curl inward like parentheses (). Very soft and romantic standard Korean style.",
+        "negative_prompt_modifier": "slick back, full forehead exposure",
+        "image_url": "https://placehold.co/400x600?text=애즈+펌+(클래식)"
+    },
+    {
+        "id": "m_17",
+        "name": "히피 펌 (남성 장발)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Men's Hippie Perm.",
+        "prompt_modifier": "Korean Men's Hippie Perm. For medium-long hair. Uniform, boho-chic waves. Artistic and free-spirited vibe. Not too tight, just bouncy volume.",
+        "negative_prompt_modifier": "straight hair, neat business cut",
+        "image_url": "https://placehold.co/400x600?text=히피+펌+(남성+장발)"
+    },
+    {
+        "id": "m_18",
+        "name": "포마드 컷 (한국식 바버)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Barber Style Pomade Cut.",
+        "prompt_modifier": "Korean Barber Style Pomade Cut. Ideally neat side part. However, unlike Western pomade, it has some volume and softness. Gentleman look. Not too oily/greasy.",
+        "negative_prompt_modifier": "greaser, wet look, messy",
+        "image_url": "https://placehold.co/400x600?text=포마드+컷+(한국식+바버)"
+    },
+    {
+        "id": "m_19",
+        "name": "울프 컷 (소프트)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Soft Wolf Cut / Mullet.",
+        "prompt_modifier": "Korean Soft Wolf Cut / Mullet. Long tail at the back, but the overall silhouette is not too extreme. Layers are textured but connected. Hip and trendy.",
+        "negative_prompt_modifier": "extreme mullet, hillbilly style",
+        "image_url": "https://placehold.co/400x600?text=울프+컷+(소프트)"
+    },
+    {
+        "id": "m_20",
+        "name": "가르마 펌 (6:4)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Parted Perm (Garma Perm).",
+        "prompt_modifier": "Korean Parted Perm (Garma Perm). 6:4 ratio. The front hair roots have volume (Root Perm). Flows naturally to the side. Intellectual look.",
+        "negative_prompt_modifier": "flat roots, spiky",
+        "image_url": "https://placehold.co/400x600?text=가르마+펌+(6:4)"
+    },
+    {
+        "id": "m_21",
+        "name": "플랫 컷",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Flat Cut.",
+        "prompt_modifier": "Korean Flat Cut. Top of head is flat, sides are slim. Very structural and chic. Modern modification of the crew cut.",
+        "negative_prompt_modifier": "round head, curly",
+        "image_url": "https://placehold.co/400x600?text=플랫+컷"
+    },
+    {
+        "id": "m_22",
+        "name": "맨 번 (예술가 스타일)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Man Bun.",
+        "prompt_modifier": "Korean Man Bun. Long hair tied up loosely and naturally. Not too tight. Small strands of hair (side bangs) falling naturally for a vibe. Artistic.",
+        "negative_prompt_modifier": "tight samurai bun, bald look",
+        "image_url": "https://placehold.co/400x600?text=맨+번+(예술가+스타일)"
+    },
+    {
+        "id": "m_23",
+        "name": "버즈 컷 (패션)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Fashion Buzz Cut.",
+        "prompt_modifier": "Korean Fashion Buzz Cut. Very short, but the hairline is perfectly lined up. Often paired with scratch details or dyed hair. Street fashion style.",
+        "negative_prompt_modifier": "military recruit, uneven",
+        "image_url": "https://placehold.co/400x600?text=버즈+컷+(패션)"
+    },
+    {
+        "id": "m_24",
+        "name": "슬릭 백 (장발)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Long Slick Back.",
+        "prompt_modifier": "Korean Long Slick Back. Long hair brushed back cleanly but with some airy volume. Not plastered to the head. Mature and sexy vibe.",
+        "negative_prompt_modifier": "short hair, spiky",
+        "image_url": "https://placehold.co/400x600?text=슬릭+백+(장발)"
+    },
+    {
+        "id": "m_25",
+        "name": "리젠트 컷 (소프트)",
+        "gender": "male",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Soft Regent Cut.",
+        "prompt_modifier": "Korean Soft Regent Cut. Forehead exposed, bangs raised. A standard short haircut for business men. Clean and trustworthy.",
+        "negative_prompt_modifier": "long hair, bangs down",
+        "image_url": "https://placehold.co/400x600?text=리젠트+컷+(소프트)"
+    },
+    {
+        "id": "w_06",
+        "name": "레이어드 컷 (허쉬 스타일)",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Layered Cut (Hush Style).",
+        "prompt_modifier": "Korean Layered Cut (Hush Style). Medium-long hair with distinct, lightweight layers. Face-framing side bangs. The ends look feathery and soft. Natural K-beauty style.",
+        "negative_prompt_modifier": "heavy blocky cut, straight bob",
+        "image_url": "https://placehold.co/400x600?text=레이어드+컷+(허쉬+스타일)"
+    },
+    {
+        "id": "w_07",
+        "name": "슬릭 컷 (뉴진스 스타일)",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Sleek Cut / Slick Perm.",
+        "prompt_modifier": "Korean Sleek Cut / Slick Perm. Long, straight hair with no layers. Very shiny and healthy texture. Y2K innocent vibe. NewJeans style.",
+        "negative_prompt_modifier": "waves, curls, volume",
+        "image_url": "https://placehold.co/400x600?text=슬릭+컷+(뉴진스+스타일)"
+    },
+    {
+        "id": "w_08",
+        "name": "빌드 펌",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Build Perm.",
+        "prompt_modifier": "Korean Build Perm. Medium length. S-curls on the side to build volume and C-curls at the ends. Feminine, elegant, and standard goddess hair.",
+        "negative_prompt_modifier": "straight, flat",
+        "image_url": "https://placehold.co/400x600?text=빌드+펌"
+    },
+    {
+        "id": "w_09",
+        "name": "태슬 컷",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Tassel Cut.",
+        "prompt_modifier": "Korean Tassel Cut. Short bob with straight, blunt ends (like a tassel). Slight outward flip at the very tips. Chic and modern city woman.",
+        "negative_prompt_modifier": "round bob, mushroom cut, curly",
+        "image_url": "https://placehold.co/400x600?text=태슬+컷"
+    },
+    {
+        "id": "w_10",
+        "name": "히피 펌 (젤리 펌)",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Hippie / Jelly Perm.",
+        "prompt_modifier": "Korean Hippie / Jelly Perm. Long hair with uniform, bouncy waves from root to tip. Cute, retro, and lovely. Volume is key but the curls are defined, not frizzy.",
+        "negative_prompt_modifier": "straight, loose waves",
+        "image_url": "https://placehold.co/400x600?text=히피+펌+(젤리+펌)"
+    },
+    {
+        "id": "w_11",
+        "name": "허쉬 컷 (중단발)",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Hush Cut (Medium).",
+        "prompt_modifier": "Korean Hush Cut (Medium). Shoulder length with high layers. Neck area is light/thin, top is voluminous. Cool, chic, and boyish-feminine mix.",
+        "negative_prompt_modifier": "heavy bob, blunt ends",
+        "image_url": "https://placehold.co/400x600?text=허쉬+컷+(중단발)"
+    },
+    {
+        "id": "w_12",
+        "name": "윈드 컷",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Wind Cut.",
+        "prompt_modifier": "Korean Wind Cut. Short/Medium layered cut. Looks like wind is blowing through it. Airy texture. Very natural and daily style.",
+        "negative_prompt_modifier": "heavy, stiff",
+        "image_url": "https://placehold.co/400x600?text=윈드+컷"
+    },
+    {
+        "id": "w_13",
+        "name": "CS컬 펌",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean CS Curl Perm.",
+        "prompt_modifier": "Korean CS Curl Perm. A mix of C-curls and S-curls. Dynamic and elegant. Most standard Korean wave permutation.",
+        "negative_prompt_modifier": "straight",
+        "image_url": "https://placehold.co/400x600?text=CS컬+펌"
+    },
+    {
+        "id": "w_14",
+        "name": "물결 펌",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Water Wave Perm.",
+        "prompt_modifier": "Korean Water Wave Perm. Distinct horizontal S-waves (Ripples). Very uniform and classic 'mermaid' hair look.",
+        "negative_prompt_modifier": "messy, random curls",
+        "image_url": "https://placehold.co/400x600?text=물결+펌"
+    },
+    {
+        "id": "w_15",
+        "name": "보니 펌",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Bonnie Perm.",
+        "prompt_modifier": "Korean Bonnie Perm. Classic C-curl bob. Rounded silhouette. Youthful, cute, and student-like vibe.",
+        "negative_prompt_modifier": "sharp bob, straight",
+        "image_url": "https://placehold.co/400x600?text=보니+펌"
+    },
+    {
+        "id": "w_16",
+        "name": "중단발 레이어드",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Medium Layered Cut.",
+        "prompt_modifier": "Korean Medium Layered Cut. Shoulder length or slightly below. Soft layers. Ends flip naturally (C-curl). Daily, easy-going look.",
+        "negative_prompt_modifier": "long hair, short bob",
+        "image_url": "https://placehold.co/400x600?text=중단발+레이어드"
+    },
+    {
+        "id": "w_17",
+        "name": "사이드 뱅 (여신머리)",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Long hair with signature Korean Side Bangs.",
+        "prompt_modifier": "Long hair with signature Korean Side Bangs. Bangs flow along the cheekbones to correct face shape. Elegant and feminine.",
+        "negative_prompt_modifier": "full straight bangs, short hair",
+        "image_url": "https://placehold.co/400x600?text=사이드+뱅+(여신머리)"
+    },
+    {
+        "id": "w_18",
+        "name": "처피 뱅",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Choppy Bangs.",
+        "prompt_modifier": "Korean Choppy Bangs. Eyebrow-revealing short bangs with uneven texture. Cute and kitsch. Paired with long or short hair.",
+        "negative_prompt_modifier": "long bangs, elegant",
+        "image_url": "https://placehold.co/400x600?text=처피+뱅"
+    },
+    {
+        "id": "w_19",
+        "name": "모즈 펌",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Mods Perm.",
+        "prompt_modifier": "Korean Mods Perm. Short bob with C-curls creating a clean, slightly outward silhouette. Classic and lovely.",
+        "negative_prompt_modifier": "messy, shaggy",
+        "image_url": "https://placehold.co/400x600?text=모즈+펌"
+    },
+    {
+        "id": "w_20",
+        "name": "샌드 컷",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Sand Cut.",
+        "prompt_modifier": "Korean Sand Cut. A layered cut with sandy, scattering texture. Very light ends. Mood-focused style.",
+        "negative_prompt_modifier": "heavy, blocky",
+        "image_url": "https://placehold.co/400x600?text=샌드+컷"
+    },
+    {
+        "id": "w_21",
+        "name": "페이지 컷",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Page Cut.",
+        "prompt_modifier": "Korean Page Cut. A clean, round, helmet-like (but stylish) bob. Minimal layers. Focus on the head shape.",
+        "negative_prompt_modifier": "shaggy, layered",
+        "image_url": "https://placehold.co/400x600?text=페이지+컷"
+    },
+    {
+        "id": "w_22",
+        "name": "발레아쥬 (애쉬)",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Ash Balayage.",
+        "prompt_modifier": "Korean Ash Balayage. Subtle highlights. Not too high contrast. Soft, milky colors preferred over strong western gold.",
+        "negative_prompt_modifier": "high contrast, yellow gold",
+        "image_url": "https://placehold.co/400x600?text=발레아쥬+(애쉬)"
+    },
+    {
+        "id": "w_23",
+        "name": "옴브레 (소프트)",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Soft Ombre.",
+        "prompt_modifier": "Korean Soft Ombre. Gradual fade. Colors are usually ash brown, ash gray, or pink. Natural gradient.",
+        "negative_prompt_modifier": "harsh line, solid color",
+        "image_url": "https://placehold.co/400x600?text=옴브레+(소프트)"
+    },
+    {
+        "id": "w_24",
+        "name": "단발 C컬 (기본)",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Standard Korean C-curl Bob.",
+        "prompt_modifier": "Standard Korean C-curl Bob. Chin length. Ends curl inward. Innocent and neat.",
+        "negative_prompt_modifier": "waves",
+        "image_url": "https://placehold.co/400x600?text=단발+C컬+(기본)"
+    },
+    {
+        "id": "w_25",
+        "name": "구름 펌 (굵은 히피)",
+        "gender": "female",
+        "tags": [
+            "New",
+            "Trendy"
+        ],
+        "face_shape_match": [
+            "oval",
+            "round"
+        ],
+        "description": "Korean Cloud Perm.",
+        "prompt_modifier": "Korean Cloud Perm. Similar to Hippie perm but the curls are much larger and looser, like clouds. Soft and fluffy volume. Romantic.",
+        "negative_prompt_modifier": "tight curls, small curls",
+        "image_url": "https://placehold.co/400x600?text=구름+펌+(굵은+히피)"
     }
 ]

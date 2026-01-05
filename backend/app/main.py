@@ -1,9 +1,10 @@
+```python
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 
-from app.api.endpoints import consultant
+from app.api.endpoints import consultant, quick_styles, quick_generate, quick_upload
 
 app = FastAPI(title="Hair Omakase API", version="1.0")
 
@@ -33,6 +34,9 @@ app.mount("/results", StaticFiles(directory=RESULTS_DIR), name="results")
 
 # Routes
 app.include_router(consultant.router, prefix="/api/consultant", tags=["consultant"])
+app.include_router(quick_styles.router, prefix="/api/styles", tags=["quick_styles"])
+app.include_router(quick_generate.router, prefix="/api/generate", tags=["quick_generate"])
+app.include_router(quick_upload.router, prefix="/api/upload", tags=["quick_upload"])
 
 @app.get("/")
 def read_root():
