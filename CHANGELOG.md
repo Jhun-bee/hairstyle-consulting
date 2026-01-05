@@ -4,6 +4,29 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.4.3] - 2026-01-05
+
+### ✨ Added
+- **Quick Fitting 결과 페이지**: 좋아요(❤️), 공유, 홈 버튼 추가
+- **Quick Fitting 헤더**: My(❤️) + Home 버튼 (Omakase와 동일)
+- localStorage에 좋아요한 스타일 저장 기능
+
+### 🔧 Changed
+- **이미지 생성 모델**: `gemini-2.0-flash-exp` → `gemini-2.5-flash-image` (Nano Banana)
+- **액션 버튼 구성**: 다시하기(왼쪽) + 다운로드 + 공유 + 좋아요 (오른쪽) 순서로 배치 (하단 바 제거)
+- "Next Step" → "Select Style" 버튼 텍스트 변경
+- "Try Another" 경로: 업로드 → 스타일 선택 페이지로 수정
+- 뒤로가기 버튼: 명확한 경로 지정 (step1→홈, step2→step1)
+- URL 파라미터로 상태 복원 (step, imageId, gender, uploadedUrl)
+
+### 🐛 Fixed
+- **Quick Fitting 이미지 생성 오류**: 모델이 IMAGE modality 미지원 문제 해결
+- Quick Fitting 이미지 경로 문제 (blob URL → backend URL)
+- 파일 확장자 fallback 개선 (.png, .jpg, .jpeg, .webp)
+- 에러 시 traceback 출력 추가
+
+---
+
 ## [v0.4.2] - 2026-01-05
 
 ### 🐛 Fixed

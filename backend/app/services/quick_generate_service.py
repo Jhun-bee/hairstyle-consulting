@@ -13,7 +13,15 @@ class GenerateService:
             return result
         except Exception as e:
             print(f"Generate Service Error: {e}")
-            # Fallback for now if gen fails
-            return f"/uploads/{image_id}.jpg"
+            import traceback
+            traceback.print_exc()
+            # Fallback for now if gen fails - try different extensions
+            import os
+            BACKEND_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            UPLOADS_DIR = os.path.join(BACKEND_ROOT, "uploads")
+            for ext in [".png", ".jpg", ".jpeg", ".webp"]:
+                if os.path.exists(os.path.join(UPLOADS_DIR, f"{image_id}{ext}")):
+                    return f"/uploads/{image_id}{ext}"
+            return f"/uploads/{image_id}.png"
 
 quick_generate_service = GenerateService()

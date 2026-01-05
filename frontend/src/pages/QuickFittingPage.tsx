@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Upload, X, Loader2, Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Upload, X, Loader2, Sparkles, ArrowRight, ArrowLeft, Heart, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getStyles, uploadImage, generateQuickFitting } from '../services/api';
 
 const QuickFittingPage = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     // State
     const [step, setStep] = useState<1 | 2>(1); // 1: Upload, 2: Select Style
@@ -19,6 +20,26 @@ const QuickFittingPage = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [isThinking, setIsThinking] = useState(false);
+
+    // Restore state from URL params (when returning from result page)
+    useEffect(() => {
+        const urlStep = searchParams.get('step');
+        const urlId = searchParams.get('id');
+        const urlGender = searchParams.get('gender') as 'male' | 'female' | null;
+        const urlUploadedUrl = searchParams.get('uploadedUrl');
+
+        if (urlStep === '2' && urlId) {
+            setStep(2);
+            setImageId(urlId);
+            // Use uploaded URL from params if available
+            if (urlUploadedUrl) {
+                setUploadedUrl(decodeURIComponent(urlUploadedUrl));
+            }
+        }
+        if (urlGender) {
+            setGender(urlGender);
+        }
+    }, [searchParams]);
 
     // Load Styles
     useEffect(() => {
@@ -34,6 +55,8 @@ const QuickFittingPage = () => {
     }, []);
 
     // Handlers
+    const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -48,6 +71,7 @@ const QuickFittingPage = () => {
         try {
             const res = await uploadImage(selectedImage);
             setImageId(res.image_id); // Ensure backend returns image_id
+            setUploadedUrl(res.url); // Store the actual URL with correct extension
             setStep(2);
         } catch (err) {
             console.error(err);
@@ -62,8 +86,12 @@ const QuickFittingPage = () => {
         setIsThinking(true);
         try {
             const res = await generateQuickFitting(imageId, selectedStyle, gender);
-            // res.result_image should be the URL
-            navigate(`/quick-result?id=${imageId}&url=${encodeURIComponent(previewUrl || '')}&resultUrl=${encodeURIComponent(res.result_image)}&style=${selectedStyle}`);
+            // Use uploadedUrl from state (has correct extension from backend)
+            const API_HOST = window.location.hostname || 'localhost';
+            const fullUploadedUrl = uploadedUrl?.startsWith('/')
+                ? `http://${API_HOST}:8000${uploadedUrl}`
+                : uploadedUrl;
+            navigate(`/quick-result?id=${imageId}&url=${encodeURIComponent(fullUploadedUrl || '')}&resultUrl=${encodeURIComponent(res.result_image)}&style=${selectedStyle}&gender=${gender}`);
         } catch (err) {
             console.error(err);
             alert("Generation failed.");
@@ -73,10 +101,18 @@ const QuickFittingPage = () => {
 
     return (
         <div className="min-h-screen px-8 pt-20 flex flex-col items-center max-w-md mx-auto relative">
-            <div className="fixed top-0 left-0 right-0 p-4 flex items-center z-50 bg-gradient-to-b from-gray-900 to-transparent max-w-md mx-auto">
-                <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all">
+            <div className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-gray-900 to-transparent max-w-md mx-auto">
+                <button onClick={() => step === 1 ? navigate('/') : setStep(1)} className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all">
                     <ArrowLeft className="w-6 h-6 text-white" />
                 </button>
+                <div className="flex gap-2">
+                    <button onClick={() => navigate('/mystyles')} className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all">
+                        <Heart className="w-5 h-5 text-white" />
+                    </button>
+                    <button onClick={() => navigate('/')} className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all">
+                        <Home className="w-5 h-5 text-white" />
+                    </button>
+                </div>
             </div>
 
             <div className="w-full text-center space-y-2 mb-8">
@@ -122,7 +158,7 @@ const QuickFittingPage = () => {
                             className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center space-x-2 transition-all ${!selectedImage ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-white text-black hover:scale-[1.02] shadow-lg shadow-blue-500/20'
                                 }`}
                         >
-                            {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><span>Next Step</span><ArrowRight className="w-6 h-6" /></>}
+                            {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><span>Select Style</span><ArrowRight className="w-6 h-6" /></>}
                         </button>
                     </motion.div>
                 ) : (

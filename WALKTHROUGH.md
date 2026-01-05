@@ -4,6 +4,29 @@
 
 ---
 
+## 🔧 v0.4.3 (2026-01-05)
+
+### UI/UX 개선
+- **Quick Fitting 헤더 통일**
+  - My(❤️) + Home 버튼 추가 (Omakase와 동일)
+- **Quick Fitting 결과 페이지 개선**
+  - 좋아요(❤️) 버튼 + localStorage 저장
+  - 공유 버튼 (Web Share API)
+- 액션 버튼 구성: 다시하기(왼쪽) + 다운로드 + 공유 + 좋아요 (오른쪽) 순서 배치 (하단 바 제거)
+- 버튼 텍스트: "Next Step" → "Select Style"
+- "Try Another" → 스타일 선택 페이지로 이동
+- 뒤로가기 버튼 경로 명확화
+
+### 버그 수정
+- **이미지 생성 모델 수정**: `gemini-2.0-flash-exp` → `gemini-2.5-flash-image`
+  - 기존 모델이 IMAGE modality 미지원하여 오류 발생
+- Before 이미지 로딩 문제: 업로드 시 정확한 URL/확장자 저장
+- 이미지 경로: blob URL → backend URL
+- 파일 확장자 fallback 개선
+- URL 파라미터로 상태 복원 (uploadedUrl 추가)
+
+---
+
 ## 🔧 v0.4.2 (2026-01-05) - Hotfix
 
 ### 버그 수정
