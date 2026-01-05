@@ -7,6 +7,8 @@ import AnalysisPage from './pages/AnalysisPage';
 import RecommendationPage from './pages/RecommendationPage';
 import ResultPage from './pages/ResultPage';
 import MyStylePage from './pages/MyStylePage';
+import QuickFittingPage from './pages/QuickFittingPage';
+import QuickResultPage from './pages/QuickResultPage';
 
 function AnimatedRoutes() {
     const location = useLocation();
@@ -18,6 +20,8 @@ function AnimatedRoutes() {
                 <Route path="/recommend" element={<RecommendationPage />} />
                 <Route path="/result" element={<ResultPage />} />
                 <Route path="/mystyles" element={<MyStylePage />} />
+                <Route path="/quick-fitting" element={<QuickFittingPage />} />
+                <Route path="/quick-result" element={<QuickResultPage />} />
             </Routes>
         </AnimatePresence>
     );
