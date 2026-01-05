@@ -3,7 +3,7 @@ import os
 import json
 
 BACKEND_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DATA_DIR = os.path.join(BACKEND_ROOT, "app", "data")
+DATA_DIR = os.path.join(BACKEND_ROOT, "data")
 STYLES_JSON_PATH = os.path.join(DATA_DIR, "styles.json")
 
 router = APIRouter()

@@ -4,6 +4,37 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.4.1] - 2026-01-05
+
+### 🖼️ Added
+- **AI 썸네일 생성**: 여성 스타일 20종 + 남성 1종 AI 이미지 생성
+- **트렌드 검증**: 2025-2026 실제 헤어 트렌드와 크로스체크 완료
+- 트렌드 참고 자료 URL 목록 (walkthrough.md)
+
+### 🔧 Changed
+- 네비게이션 헤더: 컴팩트한 모드 전환 버튼으로 리팩토링
+- 홈페이지에서 네비게이션 숨김 처리
+- 랜딩 페이지 수직 중앙 정렬
+
+### 🐛 Fixed
+- Quick Fitting 스타일 목록 로딩 오류 (경로 수정)
+- 네비게이션 버튼 z-index 클릭 이슈
+
+---
+
+## [v0.4.0] - 2026-01-04
+
+### ✨ Added
+- **Quick Fitting**: 분석 없이 원하는 스타일로 즉시 변신
+- **통합 스타일 DB**: 남성 25종 + 여성 25종 (총 50종)
+- `NavigationHeader.tsx`: 모드 전환 헤더 컴포넌트
+- 레거시 스타일 프롬프트 고도화 (키워드 → 서술형)
+
+### 🔧 Changed
+- `gemini_client.py`: `gemini_client` alias 추가
+
+---
+
 ## [v0.3.0] - 2026-01-02
 
 ### ✨ Added

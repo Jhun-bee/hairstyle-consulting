@@ -10,6 +10,8 @@ import MyStylePage from './pages/MyStylePage';
 import QuickFittingPage from './pages/QuickFittingPage';
 import QuickResultPage from './pages/QuickResultPage';
 
+import NavigationHeader from './components/NavigationHeader';
+
 function AnimatedRoutes() {
     const location = useLocation();
     return (
@@ -37,8 +39,11 @@ function App() {
                     <div className="absolute top-[40%] -right-[10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-[120px]" />
                 </div>
 
-                <div className="relative z-10 w-full min-h-screen">
-                    <AnimatedRoutes />
+                <div className="relative z-10 w-full max-w-md mx-auto min-h-screen shadow-2xl flex flex-col">
+                    <NavigationHeader />
+                    <div className="flex-1">
+                        <AnimatedRoutes />
+                    </div>
                 </div>
             </div>
         </Router>

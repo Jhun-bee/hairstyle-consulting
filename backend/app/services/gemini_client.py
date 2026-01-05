@@ -738,3 +738,4 @@ class GeminiClient:
             return "https://placehold.co/400x1600?text=Photo+Booth+Failed"
 
 client = GeminiClient()
+gemini_client = client
