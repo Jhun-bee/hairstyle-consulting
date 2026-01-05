@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Camera, Loader2, Check } from 'lucide-react';
+import { X, Camera, Loader2, Check, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import ImageActionButtons from './ImageActionButtons';
 
@@ -55,7 +55,8 @@ export default function PoseModal({
                 base_image_url: userImagePath,
                 user_image_path: userImagePath.replace(`http://${API_HOST}:8000`, ''),
                 style_name: styleName,
-                scene_type: selectedScene
+                scene_type: selectedScene,
+                seed: Math.floor(Math.random() * 1000000)
             });
 
             const newImages = response.data.images.map((url: string) =>
@@ -127,9 +128,14 @@ export default function PoseModal({
                         <Camera className="w-5 h-5 text-pink-400" />
                         <h3 className="text-lg font-bold text-white">포즈 (화보 컷)</h3>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-gray-400" />
-                    </button>
+                    <div className="flex gap-2">
+                        <button onClick={generateImages} className="p-2 hover:bg-white/10 rounded-full transition-colors" title="다시 생성">
+                            <RefreshCw className="w-5 h-5 text-gray-400" />
+                        </button>
+                        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                            <X className="w-5 h-5 text-gray-400" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Scene Selection Tabs */}

@@ -261,7 +261,7 @@ class GeminiClient:
             # Fallback
             return "https://placehold.co/400x600?text=Fitting+Service+Unavailable"
 
-    async def generate_time_change(self, user_image_path: str, style_name: str) -> dict:
+    async def generate_time_change(self, user_image_path: str, style_name: str, seed: int = None) -> dict:
         """
         Generates hair growth simulation images for 1month, 3months, 1year.
         Returns: {"1month": url, "3months": url, "1year": url}
@@ -286,10 +286,15 @@ class GeminiClient:
                 RULES:
                 1. Keep the same face, skin tone, and facial features EXACTLY.
                 2. The hairstyle should be the same style but with natural hair growth.
-                3. Keep the original hair color - do NOT change it.
-                4. Photorealistic, high quality output.
-                5. Same image orientation and angle as input.
+                3. **BANGS/FRINGE GROWTH**: If there are bangs/fringe, they MUST grow longer naturally down the forehead/eyes. Do NOT keep them short or curled unnaturally.
+                4. Avoid unnatural "comma" shapes or perfect geometric curls. Hair should fall naturally with gravity.
+                5. Keep the original hair color - do NOT change it.
+                6. Photorealistic, high quality output.
+                7. Same image orientation and angle as input.
                 """
+                
+                if seed is not None:
+                    prompt += f"\n<!-- Variation Seed: {seed} -->"
                 
                 response = self.client.models.generate_content(
                     model=self.imagen_model_id,
@@ -323,7 +328,7 @@ class GeminiClient:
         
         return results
 
-    async def generate_multi_angle(self, user_image_path: str, style_name: str) -> dict:
+    async def generate_multi_angle(self, user_image_path: str, style_name: str, seed: int = None) -> dict:
         """
         Generates 4 angle views: front, left, right, back.
         Returns: {"front": url, "left": url, "right": url, "back": url}
@@ -361,6 +366,9 @@ class GeminiClient:
                 10. Same clothing and background style.
                 """
                 
+                if seed is not None:
+                    prompt += f"\n<!-- Variation Seed: {seed} -->"
+
                 response = self.client.models.generate_content(
                     model=self.imagen_model_id,
                     contents=[prompt, original_img],
@@ -393,7 +401,7 @@ class GeminiClient:
         
         return results
 
-    async def generate_pose(self, user_image_path: str, style_name: str, scene_type: str) -> dict:
+    async def generate_pose(self, user_image_path: str, style_name: str, scene_type: str, seed: int = None) -> dict:
         """
         Generates 6 photoshoot-style images based on scene type with unique poses.
         scene_type: "studio" | "outdoor" | "runway"
@@ -459,6 +467,9 @@ class GeminiClient:
                 7. High resolution, photorealistic output.
                 """
                 
+                if seed is not None:
+                    prompt += f"\n<!-- Variation Seed: {seed} -->"
+
                 response = self.client.models.generate_content(
                     model=self.imagen_model_id,
                     contents=[prompt, original_img],

@@ -124,7 +124,8 @@ async def generate_time_change(request: TimeChangeRequest):
     
     result = await client.generate_time_change(
         user_image_path=original_path,
-        style_name=request.style_name
+        style_name=request.style_name,
+        seed=request.seed
     )
     
     return result
@@ -142,7 +143,8 @@ async def generate_multi_angle(request: MultiAngleRequest):
     
     result = await client.generate_multi_angle(
         user_image_path=original_path,
-        style_name=request.style_name
+        style_name=request.style_name,
+        seed=request.seed
     )
     
     return result
@@ -162,7 +164,8 @@ async def generate_pose(request: PoseRequest):
     result = await client.generate_pose(
         user_image_path=original_path,
         style_name=request.style_name,
-        scene_type=request.scene_type
+        scene_type=request.scene_type,
+        seed=request.seed
     )
     
     return result

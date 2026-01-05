@@ -32,12 +32,14 @@ class TimeChangeRequest(BaseModel):
     base_image_url: str      # 피팅 결과 이미지 URL
     user_image_path: str     # 원본 사용자 이미지 파일명
     style_name: str          # 헤어스타일 이름
+    seed: Optional[int] = None
 
 class MultiAngleRequest(BaseModel):
     """다각도 (앞/옆/뒤) 이미지 생성 요청"""
     base_image_url: str
     user_image_path: str
     style_name: str
+    seed: Optional[int] = None
 
 class PoseRequest(BaseModel):
     """포즈 (화보 컷) 이미지 생성 요청"""
@@ -45,6 +47,7 @@ class PoseRequest(BaseModel):
     user_image_path: str
     style_name: str
     scene_type: str  # "studio" | "outdoor" | "runway"
+    seed: Optional[int] = None
 
 class PhotoBoothRequest(BaseModel):
     """인생세컷 합성 요청"""

@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
@@ -34,7 +33,7 @@ function App() {
                     <div className="absolute top-[40%] -right-[10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-[120px]" />
                 </div>
 
-                <div className="relative z-10 max-w-md mx-auto min-h-screen flex flex-col items-center justify-center p-4">
+                <div className="relative z-10 w-full min-h-screen">
                     <AnimatedRoutes />
                 </div>
             </div>

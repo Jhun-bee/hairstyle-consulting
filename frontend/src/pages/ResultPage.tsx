@@ -141,7 +141,7 @@ export default function ResultPage() {
     };
 
     return (
-        <div className="min-h-screen p-6 pt-20 max-w-md mx-auto flex flex-col relative pb-24">
+        <div className="min-h-screen px-8 pt-20 max-w-md mx-auto flex flex-col relative pb-24">
             {/* Header */}
             <div className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center z-40 bg-gradient-to-b from-gray-900 via-gray-900/90 to-transparent max-w-md mx-auto">
                 <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all">

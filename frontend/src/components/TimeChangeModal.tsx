@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Clock, Loader2 } from 'lucide-react';
+import { X, Clock, Loader2, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import ImageActionButtons from './ImageActionButtons';
 
@@ -57,7 +57,8 @@ export default function TimeChangeModal({
             const response = await axios.post(`${API_BASE_URL}/consultant/time-change`, {
                 base_image_url: userImagePath,
                 user_image_path: userImagePath.replace(`http://${API_HOST}:8000`, ''),
-                style_name: styleName
+                style_name: styleName,
+                seed: Math.floor(Math.random() * 1000000)
             });
 
             setImages({
@@ -91,9 +92,14 @@ export default function TimeChangeModal({
                         <Clock className="w-5 h-5 text-blue-400" />
                         <h3 className="text-lg font-bold text-white">시간 변화</h3>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-gray-400" />
-                    </button>
+                    <div className="flex gap-2">
+                        <button onClick={generateImages} className="p-2 hover:bg-white/10 rounded-full transition-colors" title="다시 생성">
+                            <RefreshCw className="w-5 h-5 text-gray-400" />
+                        </button>
+                        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                            <X className="w-5 h-5 text-gray-400" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Content - Grid View showing all 4 images */}
@@ -142,7 +148,7 @@ export default function TimeChangeModal({
                                         )}
                                     </div>
                                     {/* Label */}
-                                    <div className={`absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent rounded-b-xl ${key === 'original' ? 'from-blue-900/80' : ''}`}>
+                                    <div className="absolute bottom-0 left-0 right-0 py-2 bg-black/70 backdrop-blur-sm">
                                         <p className={`text-xs font-bold text-center ${key === 'original' ? 'text-blue-300' : 'text-white'}`}>
                                             {periodLabels[key]}
                                         </p>

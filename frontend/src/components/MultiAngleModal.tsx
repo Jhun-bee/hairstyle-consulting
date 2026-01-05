@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, RotateCcw, Loader2 } from 'lucide-react';
+import { X, RotateCcw, Loader2, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import ImageActionButtons from './ImageActionButtons';
 
@@ -52,7 +52,8 @@ export default function MultiAngleModal({
             const response = await axios.post(`${API_BASE_URL}/consultant/multi-angle`, {
                 base_image_url: userImagePath,
                 user_image_path: userImagePath.replace(`http://${API_HOST}:8000`, ''),
-                style_name: styleName
+                style_name: styleName,
+                seed: Math.floor(Math.random() * 1000000)
             });
 
             const newImages: Record<AngleKey, string> = {
@@ -87,9 +88,14 @@ export default function MultiAngleModal({
                         <RotateCcw className="w-5 h-5 text-purple-400" />
                         <h3 className="text-lg font-bold text-white">다각도</h3>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-gray-400" />
-                    </button>
+                    <div className="flex gap-2">
+                        <button onClick={generateImages} className="p-2 hover:bg-white/10 rounded-full transition-colors" title="다시 생성">
+                            <RefreshCw className="w-5 h-5 text-gray-400" />
+                        </button>
+                        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                            <X className="w-5 h-5 text-gray-400" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Content */}
@@ -132,7 +138,7 @@ export default function MultiAngleModal({
                                             </div>
                                         )}
                                     </div>
-                                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent rounded-b-xl">
+                                    <div className="absolute bottom-0 left-0 right-0 py-2 bg-black/70 backdrop-blur-sm">
                                         <p className="text-xs font-medium text-white text-center">{angleLabels[angle]}</p>
                                     </div>
                                     {/* Action buttons at bottom center */}
