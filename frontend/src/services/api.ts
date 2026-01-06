@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Dynamic API URL - uses current hostname so it works on LAN
-const API_HOST = window.location.hostname || 'localhost';
-const API_BASE_URL = `http://${API_HOST}:8000/api/consultant`;
+// Relative API URL - uses Vite proxy
+const API_BASE_URL = `/api/consultant`;
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
@@ -55,7 +55,7 @@ export const virtualFitting = async (styleId: string) => {
 };
 
 // Quick Fitting API (Ported)
-const GENERAL_API_BASE_URL = `http://${API_HOST}:8000/api`;
+const GENERAL_API_BASE_URL = `/api`;
 export const generalApi = axios.create({
     baseURL: GENERAL_API_BASE_URL,
     headers: { 'Content-Type': 'application/json' },

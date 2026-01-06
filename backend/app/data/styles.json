@@ -1,7 +1,7 @@
 [
     {
         "id": "m_01",
-        "name": "시스루 댄디컷",
+        "name": "시스루 댄디 컷",
         "gender": "male",
         "tags": [
             "트렌디",
@@ -20,7 +20,7 @@
     },
     {
         "id": "m_02",
-        "name": "드롭컷",
+        "name": "드롭 컷",
         "gender": "male",
         "tags": [
             "깔끔함",
@@ -39,7 +39,7 @@
     },
     {
         "id": "m_03",
-        "name": "리프컷",
+        "name": "리프 컷",
         "gender": "male",
         "tags": [
             "예술적",
@@ -58,7 +58,7 @@
     },
     {
         "id": "m_04",
-        "name": "가일컷",
+        "name": "가일 컷",
         "gender": "male",
         "tags": [
             "포멀",
@@ -77,7 +77,7 @@
     },
     {
         "id": "m_05",
-        "name": "쉐도우펌",
+        "name": "쉐도우 펌",
         "gender": "male",
         "tags": [
             "귀여움",
@@ -96,7 +96,7 @@
     },
     {
         "id": "w_01",
-        "name": "허쉬컷",
+        "name": "허쉬 컷",
         "gender": "female",
         "tags": [
             "힙함",
@@ -115,7 +115,7 @@
     },
     {
         "id": "w_02",
-        "name": "태슬컷",
+        "name": "태슬 컷",
         "gender": "female",
         "tags": [
             "도도함",
@@ -134,7 +134,7 @@
     },
     {
         "id": "w_03",
-        "name": "히피펌",
+        "name": "히피 펌",
         "gender": "female",
         "tags": [
             "러블리",
@@ -153,7 +153,7 @@
     },
     {
         "id": "w_04",
-        "name": "슬릭컷",
+        "name": "슬릭 컷",
         "gender": "female",
         "tags": [
             "청순",
@@ -173,7 +173,7 @@
     },
     {
         "id": "w_05",
-        "name": "엘리자벳펌",
+        "name": "엘리자벳 펌",
         "gender": "female",
         "tags": [
             "우아함",
@@ -276,57 +276,6 @@
         "image_url": "/uploads/spin_swallow_perm.png"
     },
     {
-        "id": "m_11",
-        "name": "가일 컷",
-        "gender": "male",
-        "tags": [
-            "New",
-            "Trendy"
-        ],
-        "face_shape_match": [
-            "oval",
-            "round"
-        ],
-        "description": "Korean Guile Cut.",
-        "prompt_modifier": "Korean Guile Cut. One side is a natural comma bang, the other is tucked behind the ear. Sharp and masculine. The texture is clean and semi-matte, not overly greasy pomade style. Park Seo-joon style.",
-        "negative_prompt_modifier": "messy, full bangs, long hair",
-        "image_url": "/uploads/guile_cut.png"
-    },
-    {
-        "id": "m_12",
-        "name": "시스루 댄디 컷",
-        "gender": "male",
-        "tags": [
-            "New",
-            "Trendy"
-        ],
-        "face_shape_match": [
-            "oval",
-            "round"
-        ],
-        "description": "Korean See-through Dandy Cut.",
-        "prompt_modifier": "Korean See-through Dandy Cut. The most popular daily hairstyle in Korea. Soft bangs that lightly cover the forehead. Very natural and innocent look. Not too heavy.",
-        "negative_prompt_modifier": "heavy bowl cut, helmet hair, spiky",
-        "image_url": "/uploads/seethrough_dandy_cut.png"
-    },
-    {
-        "id": "m_13",
-        "name": "쉐도우 펌",
-        "gender": "male",
-        "tags": [
-            "New",
-            "Trendy"
-        ],
-        "face_shape_match": [
-            "oval",
-            "round"
-        ],
-        "description": "Korean Shadow Perm.",
-        "prompt_modifier": "Korean Shadow Perm. S-curl waves that create shadow-like volume on top. The curls are soft and round, not tight. Cute and energetic younger brother vibe.",
-        "negative_prompt_modifier": "straight hair, flat, stiff curls",
-        "image_url": "/uploads/shadow_perm.png"
-    },
-    {
         "id": "m_14",
         "name": "아이비리그 컷",
         "gender": "male",
@@ -344,23 +293,6 @@
         "image_url": "/uploads/ivyleague_cut.png"
     },
     {
-        "id": "m_15",
-        "name": "드롭 컷",
-        "gender": "male",
-        "tags": [
-            "New",
-            "Trendy"
-        ],
-        "face_shape_match": [
-            "oval",
-            "round"
-        ],
-        "description": "Korean Drop Cut.",
-        "prompt_modifier": "Korean Drop Cut. Similar to Ivy League but the side bangs drop down to cover the M-line of the forehead. Sharp, trendy, and face-slimming effect.",
-        "negative_prompt_modifier": "long hair, messy",
-        "image_url": "/uploads/drop_cut.png"
-    },
-    {
         "id": "m_16",
         "name": "애즈 펌",
         "gender": "male",
@@ -376,23 +308,6 @@
         "prompt_modifier": "Korean Classic As Perm. Natural center parting where the bangs curl inward like parentheses (). Very soft and romantic standard Korean style.",
         "negative_prompt_modifier": "slick back, full forehead exposure",
         "image_url": "/uploads/as_perm.png"
-    },
-    {
-        "id": "m_17",
-        "name": "히피 펌 (남성)",
-        "gender": "male",
-        "tags": [
-            "New",
-            "Trendy"
-        ],
-        "face_shape_match": [
-            "oval",
-            "round"
-        ],
-        "description": "Korean Men's Hippie Perm.",
-        "prompt_modifier": "Korean Men's Hippie Perm. For medium-long hair. Uniform, boho-chic waves. Artistic and free-spirited vibe. Not too tight, just bouncy volume.",
-        "negative_prompt_modifier": "straight hair, neat business cut",
-        "image_url": "/uploads/hippie_perm_male.png"
     },
     {
         "id": "m_18",
@@ -548,23 +463,6 @@
         "image_url": "/uploads/layered_cut.png"
     },
     {
-        "id": "w_07",
-        "name": "슬릭 컷 (뉴진스)",
-        "gender": "female",
-        "tags": [
-            "New",
-            "Trendy"
-        ],
-        "face_shape_match": [
-            "oval",
-            "round"
-        ],
-        "description": "Korean Sleek Cut / Slick Perm.",
-        "prompt_modifier": "Korean Sleek Cut / Slick Perm. Long, straight hair with no layers. Very shiny and healthy texture. Y2K innocent vibe. NewJeans style.",
-        "negative_prompt_modifier": "waves, curls, volume",
-        "image_url": "/uploads/sleek_cut.png"
-    },
-    {
         "id": "w_08",
         "name": "빌드 펌",
         "gender": "female",
@@ -580,57 +478,6 @@
         "prompt_modifier": "Korean Build Perm. Medium length. S-curls on the side to build volume and C-curls at the ends. Feminine, elegant, and standard goddess hair.",
         "negative_prompt_modifier": "straight, flat",
         "image_url": "/uploads/build_perm.png"
-    },
-    {
-        "id": "w_09",
-        "name": "태슬 컷 (단발)",
-        "gender": "female",
-        "tags": [
-            "New",
-            "Trendy"
-        ],
-        "face_shape_match": [
-            "oval",
-            "round"
-        ],
-        "description": "Korean Tassel Cut.",
-        "prompt_modifier": "Korean Tassel Cut. Short bob with straight, blunt ends (like a tassel). Slight outward flip at the very tips. Chic and modern city woman.",
-        "negative_prompt_modifier": "round bob, mushroom cut, curly",
-        "image_url": "/uploads/tassel_cut.png"
-    },
-    {
-        "id": "w_10",
-        "name": "젤리 펌 (히피)",
-        "gender": "female",
-        "tags": [
-            "New",
-            "Trendy"
-        ],
-        "face_shape_match": [
-            "oval",
-            "round"
-        ],
-        "description": "Korean Hippie / Jelly Perm.",
-        "prompt_modifier": "Korean Hippie / Jelly Perm. Long hair with uniform, bouncy waves from root to tip. Cute, retro, and lovely. Volume is key but the curls are defined, not frizzy.",
-        "negative_prompt_modifier": "straight, loose waves",
-        "image_url": "/uploads/hippie_perm.png"
-    },
-    {
-        "id": "w_11",
-        "name": "허쉬 컷 (중단발)",
-        "gender": "female",
-        "tags": [
-            "New",
-            "Trendy"
-        ],
-        "face_shape_match": [
-            "oval",
-            "round"
-        ],
-        "description": "Korean Hush Cut (Medium).",
-        "prompt_modifier": "Korean Hush Cut (Medium). Shoulder length with high layers. Neck area is light/thin, top is voluminous. Cool, chic, and boyish-feminine mix.",
-        "negative_prompt_modifier": "heavy bob, blunt ends",
-        "image_url": "/uploads/hush_cut.png"
     },
     {
         "id": "w_12",

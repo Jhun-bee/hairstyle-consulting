@@ -23,8 +23,8 @@ const QuickFittingPage = () => {
     const [isThinking, setIsThinking] = useState(false);
     const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
-    const API_HOST = window.location.hostname || 'localhost';
-    const BACKEND_URL = `http://${API_HOST}:8000`;
+    // Use relative paths (Vite proxy handles /uploads)
+    // const BACKEND_URL = ... (removed)
 
     // Restore state from URL params (when returning from result page)
     useEffect(() => {
@@ -91,9 +91,7 @@ const QuickFittingPage = () => {
         try {
             const res = await generateQuickFitting(imageId, selectedStyle, gender);
             // Use uploadedUrl from state (has correct extension from backend)
-            const fullUploadedUrl = uploadedUrl?.startsWith('/')
-                ? `${BACKEND_URL}${uploadedUrl}`
-                : uploadedUrl;
+            const fullUploadedUrl = uploadedUrl;
             navigate(`/quick-result?id=${imageId}&url=${encodeURIComponent(fullUploadedUrl || '')}&resultUrl=${encodeURIComponent(res.result_image)}&style=${selectedStyle}&gender=${gender}`);
         } catch (err) {
             console.error(err);
@@ -198,7 +196,7 @@ const QuickFittingPage = () => {
                                     <div className="absolute inset-0 bg-gray-800">
                                         {style.image_url ? (
                                             <img
-                                                src={style.image_url.startsWith('http') ? style.image_url : `${BACKEND_URL}${style.image_url}`}
+                                                src={style.image_url}
                                                 alt={style.name}
                                                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                                 loading="lazy"

@@ -14,16 +14,9 @@ const QuickResultPage = () => {
     const imageId = searchParams.get('id');
     const gender = searchParams.get('gender') || 'male';
 
-    // Fix: Prepend Backend Host if resultUrl is relative
-    const API_HOST = window.location.hostname || 'localhost';
-    const backendResultUrl = resultUrl?.startsWith('/')
-        ? `http://${API_HOST}:8000${resultUrl}`
-        : resultUrl;
-
-    // Fix: Also do it for imageUrl if needed (uploads are usually relative too)
-    const backendImageUrl = imageUrl?.startsWith('/')
-        ? `http://${API_HOST}:8000${imageUrl}`
-        : imageUrl;
+    // Use relative paths; Vite proxy will handle forwarding to backend
+    const backendResultUrl = resultUrl;
+    const backendImageUrl = imageUrl;
 
     const handleDownload = async () => {
         if (!backendResultUrl) return;

@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, RotateCcw, Loader2, RefreshCw } from 'lucide-react';
+import { X, RotateCcw, Loader2, RefreshCw, ZoomIn } from 'lucide-react';
 import axios from 'axios';
-import ImageActionButtons from './ImageActionButtons';
-
-const API_HOST = window.location.hostname || 'localhost';
-const API_BASE_URL = `http://${API_HOST}:8000/api`;
 
 interface MultiAngleModalProps {
     isOpen: boolean;
@@ -13,84 +9,121 @@ interface MultiAngleModalProps {
     styleName: string;
 }
 
-type AngleKey = 'front' | 'left' | 'right' | 'back';
+// Helper to extract path
+const getPathOnly = (fullUrl: string) => {
+    try {
+        if (!fullUrl) return '';
+        if (fullUrl.startsWith('http')) {
+            const url = new URL(fullUrl);
+            return url.pathname;
+        }
+        return fullUrl;
+    } catch (e) {
+        return fullUrl;
+    }
+}
 
-export default function MultiAngleModal({
+export function MultiAngleModal({
     isOpen,
     onClose,
     userImagePath,
     styleName
 }: MultiAngleModalProps) {
     const [isLoading, setIsLoading] = useState(false);
-    const [images, setImages] = useState<Record<AngleKey, string>>({
-        front: '',
-        left: '',
-        right: '',
-        back: ''
-    });
-    const [selectedAngle, setSelectedAngle] = useState<AngleKey | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const [images, setImages] = useState<Record<string, string>>({});
 
-    const angleLabels: Record<AngleKey, string> = {
-        front: '정면',
-        left: '왼쪽',
-        right: '오른쪽',
-        back: '뒷모습'
+    // Zoom State
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [selectedLabel, setSelectedLabel] = useState<string>('');
+
+    const angleLabels: Record<string, string> = {
+        'left': '왼쪽',
+        'right': '오른쪽',
+        'back': '뒷모습'
     };
 
-    // Generate images when modal opens
+    // Reset/Generate
     useEffect(() => {
-        if (isOpen && !images.front) {
-            generateImages();
+        if (isOpen) {
+            // Auto generate if empty (checking keys length < 1 because we don't set 'front' initially in state unlike TimeChange)
+            // But actually we should verify if we want to show 'front' as userImagePath by default?
+            if (Object.keys(images).length === 0) {
+                generateImages();
+            }
         }
     }, [isOpen]);
 
     const generateImages = async () => {
         setIsLoading(true);
-        setError(null);
         try {
+            const API_BASE_URL = '/api';
+            const pathOnly = getPathOnly(userImagePath);
+
             const response = await axios.post(`${API_BASE_URL}/consultant/multi-angle`, {
-                base_image_url: userImagePath,
-                user_image_path: userImagePath.replace(`http://${API_HOST}:8000`, ''),
-                style_name: styleName,
-                seed: Math.floor(Math.random() * 1000000)
+                user_image_path: pathOnly,
+                style_name: styleName
             });
 
-            const newImages: Record<AngleKey, string> = {
-                front: response.data.front ? `http://${API_HOST}:8000${response.data.front}` : '',
-                left: response.data.left ? `http://${API_HOST}:8000${response.data.left}` : '',
-                right: response.data.right ? `http://${API_HOST}:8000${response.data.right}` : '',
-                back: response.data.back ? `http://${API_HOST}:8000${response.data.back}` : ''
-            };
-            setImages(newImages);
+            if (response.data) {
+                setImages(prev => ({
+                    ...prev,
+                    ...response.data
+                }));
+            }
         } catch (err) {
             console.error('Multi-angle generation failed:', err);
-            setError('이미지 생성에 실패했습니다. 다시 시도해주세요.');
+            alert('이미지 생성 실패');
         } finally {
             setIsLoading(false);
         }
+    };
+
+    // History handling for Zoom
+    useEffect(() => {
+        const handlePopState = (event: PopStateEvent) => {
+            const modalState = event.state?.modal;
+            if (modalState === 'nested_multiAngle_zoom') {
+                // Zoom active
+            } else if (modalState === 'multiAngle') {
+                // Back to parent
+                setSelectedImage(null);
+                setSelectedLabel('');
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const openZoom = (img: string, label: string) => {
+        window.history.pushState({ modal: 'nested_multiAngle_zoom' }, '', '');
+        setSelectedImage(img);
+        setSelectedLabel(label);
+    };
+
+    const closeZoom = () => {
+        window.history.back();
     };
 
     if (!isOpen) return null;
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
             onClick={onClose}
         >
             <div
-                className="bg-gray-900 rounded-2xl w-full max-w-md mx-4 overflow-hidden shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto"
+                className="bg-gray-900 rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-white/10"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-white/10 sticky top-0 bg-gray-900 z-10">
-                    <div className="flex items-center gap-2">
+                <div className="p-4 flex justify-between items-center border-b border-white/10 shrink-0">
+                    <h3 className="text-lg font-bold flex items-center gap-2 text-white">
                         <RotateCcw className="w-5 h-5 text-purple-400" />
-                        <h3 className="text-lg font-bold text-white">다각도</h3>
-                    </div>
+                        다각도 뷰
+                    </h3>
                     <div className="flex gap-2">
-                        <button onClick={generateImages} className="p-2 hover:bg-white/10 rounded-full transition-colors" title="다시 생성">
-                            <RefreshCw className="w-5 h-5 text-gray-400" />
+                        <button onClick={generateImages} disabled={isLoading} className="p-2 hover:bg-white/10 rounded-full transition-colors" title="다시 생성">
+                            <RefreshCw className={`w-5 h-5 text-gray-400 ${isLoading ? 'animate-spin' : ''}`} />
                         </button>
                         <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                             <X className="w-5 h-5 text-gray-400" />
@@ -99,93 +132,89 @@ export default function MultiAngleModal({
                 </div>
 
                 {/* Content */}
-                <div className="p-4">
-                    {isLoading ? (
-                        <div className="aspect-square flex flex-col items-center justify-center bg-gray-800 rounded-xl">
-                            <Loader2 className="w-10 h-10 text-purple-500 animate-spin mb-4" />
-                            <p className="text-sm text-gray-400">AI가 다각도 이미지를 생성 중...</p>
-                            <p className="text-xs text-gray-500 mt-2">약 1분 소요됩니다</p>
+                <div className="p-4 overflow-y-auto flex-1 custom-scrollbar">
+                    <div className="grid grid-cols-2 gap-3">
+                        {/* Current (Original) */}
+                        <div
+                            className="aspect-[3/4] rounded-xl overflow-hidden relative group cursor-pointer border-2 border-purple-500/30"
+                            onClick={() => openZoom(userImagePath, '정면 (현재)')}
+                        >
+                            <img src={userImagePath} alt="Current" className="w-full h-full object-cover" />
+                            <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                                <span className="text-sm font-bold text-white text-center block">정면 (현재)</span>
+                            </div>
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ZoomIn className="w-4 h-4 text-white drop-shadow-md" />
+                            </div>
                         </div>
-                    ) : error ? (
-                        <div className="aspect-square flex flex-col items-center justify-center bg-gray-800 rounded-xl">
-                            <p className="text-red-400 mb-4">{error}</p>
-                            <button
-                                onClick={generateImages}
-                                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-                            >
-                                다시 시도
-                            </button>
-                        </div>
-                    ) : (
-                        /* Grid View */
-                        <div className="grid grid-cols-2 gap-3">
-                            {(Object.keys(angleLabels) as AngleKey[]).map(angle => (
+
+                        {/* Generated Images */}
+                        {['left', 'right', 'back'].map((key) => {
+                            const resultUrl = images[key];
+                            const label = angleLabels[key];
+
+                            return (
                                 <div
-                                    key={angle}
-                                    className="relative group cursor-pointer"
-                                    onClick={() => setSelectedAngle(angle)}
+                                    key={key}
+                                    className={`aspect-[3/4] rounded-xl overflow-hidden relative group bg-gray-800 ${resultUrl ? 'cursor-pointer border border-white/10' : ''}`}
+                                    onClick={() => resultUrl && openZoom(resultUrl, label)}
                                 >
-                                    <div className="aspect-[4/5] bg-gray-800 rounded-xl overflow-hidden">
-                                        {images[angle] ? (
-                                            <img
-                                                src={images[angle]}
-                                                alt={angleLabels[angle]}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <Loader2 className="w-6 h-6 text-gray-600 animate-spin" />
+                                    {isLoading && !resultUrl ? (
+                                        <div className="flex flex-col items-center justify-center h-full gap-2">
+                                            <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                                            <span className="text-xs text-gray-500">생성 중...</span>
+                                        </div>
+                                    ) : resultUrl ? (
+                                        <>
+                                            <img src={resultUrl} alt={label} className="w-full h-full object-cover" />
+                                            <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                                                <span className="text-sm font-bold text-white text-center block">{label}</span>
                                             </div>
-                                        )}
-                                    </div>
-                                    <div className="absolute bottom-0 left-0 right-0 py-2 bg-black/70 backdrop-blur-sm">
-                                        <p className="text-xs font-medium text-white text-center">{angleLabels[angle]}</p>
-                                    </div>
-                                    {/* Action buttons at bottom center */}
-                                    {images[angle] && (
-                                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <ImageActionButtons
-                                                imageUrl={images[angle]}
-                                                styleName={`${styleName} - ${angleLabels[angle]}`}
-                                                size="sm"
-                                            />
+                                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <ZoomIn className="w-4 h-4 text-white drop-shadow-md" />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center h-full gap-2 opacity-30">
+                                            <RotateCcw className="w-8 h-8 text-gray-600" />
+                                            <span className="text-xs text-gray-500">{label}</span>
                                         </div>
                                     )}
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            );
+                        })}
+                    </div>
                 </div>
 
-                {/* Selected Image Modal */}
-                {selectedAngle && images[selectedAngle] && (
-                    <div
-                        className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90"
-                        onClick={() => setSelectedAngle(null)}
-                    >
-                        <div className="relative max-w-lg w-full mx-4">
-                            <img
-                                src={images[selectedAngle]}
-                                alt={angleLabels[selectedAngle]}
-                                className="w-full rounded-xl"
-                            />
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-                                <ImageActionButtons
-                                    imageUrl={images[selectedAngle]}
-                                    styleName={`${styleName} - ${angleLabels[selectedAngle]}`}
-                                    size="lg"
-                                />
-                            </div>
-                            <button
-                                onClick={() => setSelectedAngle(null)}
-                                className="absolute top-4 right-4 p-2 bg-black/50 rounded-full"
-                            >
-                                <X className="w-6 h-6 text-white" />
-                            </button>
-                        </div>
-                    </div>
-                )}
+                {/* Footer */}
+                <div className="p-4 border-t border-white/10 bg-black/20 text-center shrink-0">
+                    <p className="text-xs text-gray-500">AI가 생성한 측면/후면 모습입니다</p>
+                </div>
             </div>
+
+            {/* Image Zoom Modal */}
+            {selectedImage && (
+                <div className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center animate-fade-in" onClick={closeZoom}>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); closeZoom(); }}
+                        className="absolute top-4 right-4 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors z-[70]"
+                    >
+                        <X className="w-8 h-8 text-white" />
+                    </button>
+                    {/* Add label display */}
+                    {selectedLabel && (
+                        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full text-white font-bold backdrop-blur-md z-[70]">
+                            {selectedLabel}
+                        </div>
+                    )}
+                    <img
+                        src={selectedImage}
+                        alt="Zoom"
+                        className="max-w-full max-h-screen object-contain p-4"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
         </div>
     );
 }

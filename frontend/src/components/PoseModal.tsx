@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X, Camera, Loader2, Check, RefreshCw } from 'lucide-react';
+import { X, Camera, Loader2, Check, RefreshCw, ZoomIn } from 'lucide-react';
 import axios from 'axios';
 import ImageActionButtons from './ImageActionButtons';
-
-const API_HOST = window.location.hostname || 'localhost';
-const API_BASE_URL = `http://${API_HOST}:8000/api`;
 
 interface PoseModalProps {
     isOpen: boolean;
@@ -14,6 +11,20 @@ interface PoseModalProps {
 }
 
 type SceneType = 'studio' | 'outdoor' | 'runway';
+
+// Helper to extract path
+const getPathOnly = (fullUrl: string) => {
+    try {
+        if (!fullUrl) return '';
+        if (fullUrl.startsWith('http')) {
+            const url = new URL(fullUrl);
+            return url.pathname;
+        }
+        return fullUrl;
+    } catch (e) {
+        return fullUrl;
+    }
+}
 
 export default function PoseModal({
     isOpen,
@@ -27,7 +38,9 @@ export default function PoseModal({
     const [selectedScene, setSelectedScene] = useState<SceneType>('studio');
     const [selectedImages, setSelectedImages] = useState<Set<number>>(new Set());
     const [photoBoothImage, setPhotoBoothImage] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
+
+    // Zoom State
+    const [zoomImage, setZoomImage] = useState<string | null>(null);
 
     const sceneLabels: Record<SceneType, { label: string; icon: string }> = {
         studio: { label: '스튜디오', icon: '🎬' },
@@ -42,30 +55,53 @@ export default function PoseModal({
         setPhotoBoothImage(null);
     }, [selectedScene]);
 
+    // History handling for Zoom
+    useEffect(() => {
+        const handlePopState = (event: PopStateEvent) => {
+            const modalState = event.state?.modal;
+            if (modalState === 'nested_pose_zoom') {
+                // Zoom active
+            } else if (modalState === 'pose') {
+                // Back to parent
+                setZoomImage(null);
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const openZoom = (img: string) => {
+        window.history.pushState({ modal: 'nested_pose_zoom' }, '', '');
+        setZoomImage(img);
+    };
+
+    const closeZoom = () => {
+        window.history.back();
+    };
+
     // Generate images when scene selected and modal open
     const generateImages = async () => {
         setIsLoading(true);
-        setError(null);
         setImages([]);
         setSelectedImages(new Set());
         setPhotoBoothImage(null);
 
         try {
+            const API_BASE_URL = '/api';
+            const pathOnly = getPathOnly(userImagePath);
+
             const response = await axios.post(`${API_BASE_URL}/consultant/pose`, {
-                base_image_url: userImagePath,
-                user_image_path: userImagePath.replace(`http://${API_HOST}:8000`, ''),
+                user_image_path: pathOnly,
                 style_name: styleName,
-                scene_type: selectedScene,
-                seed: Math.floor(Math.random() * 1000000)
+                scene_type: selectedScene
             });
 
-            const newImages = response.data.images.map((url: string) =>
-                url.startsWith('http') ? url : `http://${API_HOST}:8000${url}`
-            );
-            setImages(newImages);
+            if (response.data && response.data.images) {
+                setImages(response.data.images);
+            }
         } catch (err) {
             console.error('Pose generation failed:', err);
-            setError('이미지 생성에 실패했습니다. 다시 시도해주세요.');
+            alert('이미지 생성 실패');
         } finally {
             setIsLoading(false);
         }
@@ -88,10 +124,10 @@ export default function PoseModal({
 
         setIsCreatingPhotoBooth(true);
         try {
+            const API_BASE_URL = '/api';
             const selectedUrls = Array.from(selectedImages).map(i => {
                 const url = images[i];
-                // Extract the path part for backend
-                return url.replace(`http://${API_HOST}:8000`, '');
+                return getPathOnly(url);
             });
 
             const response = await axios.post(`${API_BASE_URL}/consultant/photo-booth`, {
@@ -100,12 +136,10 @@ export default function PoseModal({
             });
 
             const photoBoothUrl = response.data.photo_booth_url;
-            setPhotoBoothImage(
-                photoBoothUrl.startsWith('http') ? photoBoothUrl : `http://${API_HOST}:8000${photoBoothUrl}`
-            );
+            setPhotoBoothImage(photoBoothUrl);
         } catch (err) {
             console.error('Photo booth creation failed:', err);
-            setError('인생세컷 생성에 실패했습니다.');
+            alert('인생세컷 생성 실패');
         } finally {
             setIsCreatingPhotoBooth(false);
         }
@@ -115,22 +149,22 @@ export default function PoseModal({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
             onClick={onClose}
         >
             <div
-                className="bg-gray-900 rounded-2xl w-full max-w-md mx-4 overflow-hidden shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto"
+                className="bg-gray-900 rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-white/10"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-white/10 sticky top-0 bg-gray-900 z-10">
+                <div className="p-4 flex justify-between items-center border-b border-white/10 shrink-0">
                     <div className="flex items-center gap-2">
                         <Camera className="w-5 h-5 text-pink-400" />
                         <h3 className="text-lg font-bold text-white">포즈 (화보 컷)</h3>
                     </div>
                     <div className="flex gap-2">
-                        <button onClick={generateImages} className="p-2 hover:bg-white/10 rounded-full transition-colors" title="다시 생성">
-                            <RefreshCw className="w-5 h-5 text-gray-400" />
+                        <button onClick={generateImages} disabled={isLoading} className="p-2 hover:bg-white/10 rounded-full transition-colors" title="다시 생성">
+                            <RefreshCw className={`w-5 h-5 text-gray-400 ${isLoading ? 'animate-spin' : ''}`} />
                         </button>
                         <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                             <X className="w-5 h-5 text-gray-400" />
@@ -139,7 +173,7 @@ export default function PoseModal({
                 </div>
 
                 {/* Scene Selection Tabs */}
-                <div className="flex border-b border-white/10">
+                <div className="flex border-b border-white/10 shrink-0">
                     {(Object.keys(sceneLabels) as SceneType[]).map(scene => (
                         <button
                             key={scene}
@@ -156,17 +190,20 @@ export default function PoseModal({
                 </div>
 
                 {/* Content */}
-                <div className="p-4">
+                <div className="p-4 overflow-y-auto flex-1 custom-scrollbar">
                     {/* Photo Booth Result */}
                     {photoBoothImage ? (
                         <div className="space-y-4">
-                            <div className="relative">
+                            <div className="relative group cursor-pointer" onClick={() => openZoom(photoBoothImage)}>
                                 <img
                                     src={photoBoothImage}
                                     alt="인생세컷"
                                     className="w-full rounded-xl shadow-lg"
                                 />
-                                <div className="absolute bottom-4 right-4">
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <ZoomIn className="w-6 h-6 text-white drop-shadow-md" />
+                                </div>
+                                <div className="absolute bottom-4 right-4" onClick={e => e.stopPropagation()}>
                                     <ImageActionButtons
                                         imageUrl={photoBoothImage}
                                         styleName={`${styleName} 인생세컷`}
@@ -189,16 +226,6 @@ export default function PoseModal({
                                     <Loader2 className="w-10 h-10 text-pink-500 animate-spin mb-4" />
                                     <p className="text-sm text-gray-400">AI가 화보 이미지를 생성 중...</p>
                                     <p className="text-xs text-gray-500 mt-2">약 1분 30초 소요됩니다</p>
-                                </>
-                            ) : error ? (
-                                <>
-                                    <p className="text-red-400 mb-4">{error}</p>
-                                    <button
-                                        onClick={generateImages}
-                                        className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
-                                    >
-                                        다시 시도
-                                    </button>
                                 </>
                             ) : (
                                 <>
@@ -237,7 +264,7 @@ export default function PoseModal({
                                             }`}
                                         onClick={() => toggleImageSelection(index)}
                                     >
-                                        <div className="aspect-[4/5] bg-gray-800">
+                                        <div className="aspect-[4/5] bg-gray-800 relative">
                                             {img.includes('placehold.co') ? (
                                                 <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">
                                                     <span className="text-sm">생성 실패</span>
@@ -250,6 +277,16 @@ export default function PoseModal({
                                                 />
                                             )}
                                         </div>
+
+                                        {/* Zoom Button (Top Left - moved to allow Checkbox on Right) */}
+                                        {!img.includes('placehold.co') && (
+                                            <button
+                                                className="absolute top-2 left-2 p-1.5 bg-black/50 rounded-lg hover:bg-black/70 transition-colors opacity-0 group-hover:opacity-100"
+                                                onClick={(e) => { e.stopPropagation(); openZoom(img); }}
+                                            >
+                                                <ZoomIn className="w-4 h-4 text-white" />
+                                            </button>
+                                        )}
 
                                         {/* Checkbox */}
                                         <div
@@ -290,7 +327,7 @@ export default function PoseModal({
 
                 {/* Photo Booth Button */}
                 {images.length > 0 && !photoBoothImage && (
-                    <div className="p-4 pt-0">
+                    <div className="p-4 pt-0 shrink-0">
                         <button
                             onClick={createPhotoBooth}
                             disabled={selectedImages.size !== 3 || isCreatingPhotoBooth}
@@ -312,12 +349,30 @@ export default function PoseModal({
                 )}
 
                 {/* Footer */}
-                <div className="p-4 pt-0 text-center">
+                <div className="p-4 pt-0 text-center shrink-0">
                     <p className="text-xs text-gray-500">
                         💡 생성된 이미지를 개별 저장하거나 인생세컷으로 합성할 수 있습니다
                     </p>
                 </div>
             </div>
+
+            {/* Zoom Modal */}
+            {zoomImage && (
+                <div className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center animate-fade-in" onClick={closeZoom}>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); closeZoom(); }}
+                        className="absolute top-4 right-4 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors z-[70]"
+                    >
+                        <X className="w-8 h-8 text-white" />
+                    </button>
+                    <img
+                        src={zoomImage}
+                        alt="Zoom"
+                        className="max-w-full max-h-screen object-contain p-4"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
         </div>
     );
 }

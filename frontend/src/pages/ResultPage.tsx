@@ -3,13 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { MapPin, Home, ArrowLeft, Loader2, Download, Link2, X, ZoomIn, Heart, Share2, Search, Zap, Clock, RotateCcw, Monitor } from 'lucide-react';
 import axios from 'axios';
 import ComparisonSlider from '../components/ComparisonSlider';
-import TimeChangeModal from '../components/TimeChangeModal';
-import MultiAngleModal from '../components/MultiAngleModal';
+import { TimeChangeModal } from '../components/TimeChangeModal';
+import { MultiAngleModal } from '../components/MultiAngleModal';
 import PoseModal from '../components/PoseModal';
 
 // API Configuration
-const API_HOST = window.location.hostname || 'localhost';
-const API_BASE_URL = `http://${API_HOST}:8000/api`;
+// API Configuration
+// Use relative path - Vite proxy handles /api
+const API_BASE_URL = `/api`;
 
 export default function ResultPage() {
     const location = useLocation();
@@ -35,8 +36,66 @@ export default function ResultPage() {
         return null;
     }
 
-    // Fitting Logic
+    // Modal History Management
     useEffect(() => {
+        const handlePopState = (event: PopStateEvent) => {
+            const modalState = event.state?.modal;
+
+            // Default: Close all
+            let newTimeChange = false;
+            let newMultiAngle = false;
+            let newPose = false;
+            let newZoom = false;
+            let newShare = false;
+
+            if (modalState === 'timeChange') {
+                newTimeChange = true;
+            } else if (modalState === 'multiAngle') {
+                newMultiAngle = true;
+            } else if (modalState === 'pose') {
+                newPose = true;
+            } else if (modalState === 'zoom') {
+                newZoom = true;
+            } else if (modalState && modalState.startsWith('nested_')) {
+                // If nested state (e.g. nested_timeChange), keep the parent modal open
+                if (modalState.includes('timeChange')) newTimeChange = true;
+                if (modalState.includes('multiAngle')) newMultiAngle = true;
+                if (modalState.includes('pose')) newPose = true;
+            }
+
+            setShowTimeChangeModal(newTimeChange);
+            setShowMultiAngleModal(newMultiAngle);
+            setShowPoseModal(newPose);
+            setShowZoomModal(newZoom);
+            setShowShareMenu(newShare);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const openModal = (setter: React.Dispatch<React.SetStateAction<boolean>>, stateName: string) => {
+        window.history.pushState({ modal: stateName }, '', '');
+        setter(true);
+    };
+
+    const closeModal = () => {
+        // If we are closing via UI button, we assume we should go back in history if the current state matches
+        // But simply calling history.back() is the safest way to sync with browser behavior
+        window.history.back();
+    };
+
+    // ... Fitting Logic ...
+    // ... Fitting Logic ...
+    useEffect(() => {
+        // 1. Check if we already have a generated result in history state
+        const savedResult = location.state?.generatedResult;
+        if (savedResult) {
+            setResultImage(savedResult);
+            setIsGenerating(false);
+            return;
+        }
+
         const performFitting = async () => {
             if (resultImage) return;
             try {
@@ -51,7 +110,15 @@ export default function ResultPage() {
                     user_image_path: fileId
                 });
                 if (response.data.generated_image_url) {
-                    setResultImage(`http://${API_HOST}:8000${response.data.generated_image_url}`);
+                    const newUrl = response.data.generated_image_url;
+                    setResultImage(newUrl);
+
+                    // 2. Update history state so "Back" doesn't re-trigger generation
+                    // We use 'replace' to modify the CURRENT history entry
+                    navigate('.', {
+                        state: { ...location.state, generatedResult: newUrl },
+                        replace: true
+                    });
                 }
             } catch (error) {
                 console.error("Fitting failed:", error);
@@ -60,7 +127,7 @@ export default function ResultPage() {
             }
         };
         performFitting();
-    }, [style, analysis, resultImage]);
+    }, [style, analysis]); // Remove resultImage dependency to avoid loops if logic changes
 
     // Check initial favorite status
     useEffect(() => {
@@ -125,7 +192,9 @@ export default function ResultPage() {
     const handleCopyLink = async () => {
         if (resultImage) {
             try {
-                await navigator.clipboard.writeText(resultImage);
+                const fullShareUrl = new URL(resultImage, window.location.href).href;
+                await navigator.clipboard.writeText(fullShareUrl);
+
                 setShareMessage("링크 복사완료!");
                 // Delay closing modal so user sees the success toast
                 setTimeout(() => {
@@ -141,8 +210,9 @@ export default function ResultPage() {
     };
 
     // Construct persistent URL for the before image
+    // Use relative path (Vite proxy handles /uploads)
     const beforeImageUrl = analysis?.file_id
-        ? `http://${API_HOST}:8000/uploads/${analysis.file_id}`
+        ? `/uploads/${analysis.file_id}`
         : (imagePreview || style.image_url);
 
     return (
@@ -173,7 +243,7 @@ export default function ResultPage() {
                     <div className="absolute bottom-4 right-4 z-20 flex gap-2">
                         {/* Zoom Button */}
                         <button
-                            onClick={() => setShowZoomModal(true)}
+                            onClick={() => openModal(setShowZoomModal, 'zoom')}
                             className="p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-all"
                         >
                             <ZoomIn className="w-6 h-6 text-white" />
@@ -234,7 +304,7 @@ export default function ResultPage() {
                         </h3>
                         <div className="grid grid-cols-1 gap-3">
                             <div className="grid grid-cols-3 gap-3">
-                                <button onClick={() => setShowTimeChangeModal(true)} className="group relative p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex flex-col items-center gap-2 overflow-hidden">
+                                <button onClick={() => openModal(setShowTimeChangeModal, 'timeChange')} className="group relative p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex flex-col items-center gap-2 overflow-hidden">
                                     <div className="p-2 rounded-full bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30 transition-colors">
                                         <Clock className="w-5 h-5" />
                                     </div>
@@ -243,7 +313,7 @@ export default function ResultPage() {
                                         <p className="text-[10px] text-gray-500">머리 자람</p>
                                     </div>
                                 </button>
-                                <button onClick={() => setShowMultiAngleModal(true)} className="group relative p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex flex-col items-center gap-2 overflow-hidden">
+                                <button onClick={() => openModal(setShowMultiAngleModal, 'multiAngle')} className="group relative p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex flex-col items-center gap-2 overflow-hidden">
                                     <div className="p-2 rounded-full bg-purple-500/20 text-purple-400 group-hover:bg-purple-500/30 transition-colors">
                                         <RotateCcw className="w-5 h-5" />
                                     </div>
@@ -252,7 +322,7 @@ export default function ResultPage() {
                                         <p className="text-[10px] text-gray-500">앞/옆/뒤</p>
                                     </div>
                                 </button>
-                                <button onClick={() => setShowPoseModal(true)} className="group relative p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex flex-col items-center gap-2 overflow-hidden">
+                                <button onClick={() => openModal(setShowPoseModal, 'pose')} className="group relative p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex flex-col items-center gap-2 overflow-hidden">
                                     <div className="p-2 rounded-full bg-pink-500/20 text-pink-400 group-hover:bg-pink-500/30 transition-colors">
                                         <Monitor className="w-5 h-5" />
                                     </div>
@@ -358,12 +428,12 @@ export default function ResultPage() {
                 </div>
             )}
 
-            {/* Enhanced Zoom Modal */}
+            {/* Enhanced Zoom Modal - Using history navigation */}
             {showZoomModal && resultImage && (
                 <div className="fixed inset-0 z-50 bg-black animate-fade-in flex flex-col">
                     {/* Top Bar */}
                     <div className="flex justify-between items-center p-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10">
-                        <button onClick={() => setShowZoomModal(false)} className="p-2 text-white/80 hover:text-white">
+                        <button onClick={() => closeModal()} className="p-2 text-white/80 hover:text-white">
                             <X className="w-6 h-6" />
                         </button>
                         <div className="flex gap-4">
@@ -374,31 +444,6 @@ export default function ResultPage() {
                             >
                                 <Download className="w-6 h-6" />
                             </a>
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowShareMenu(!showShareMenu)}
-                                    className="p-2 text-white/80 hover:text-white flex flex-col items-center gap-1"
-                                >
-                                    <Share2 className="w-6 h-6" />
-                                </button>
-                                {/* Share Dropdown */}
-                                {showShareMenu && (
-                                    <div className="absolute top-full right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-xl shadow-xl overflow-hidden flex flex-col p-1">
-                                        <button onClick={handleCopyLink} className="flex items-center gap-3 p-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
-                                            <Link2 className="w-4 h-4 text-gray-400" />
-                                            <span className="text-sm text-gray-200">링크 복사</span>
-                                        </button>
-                                        <button className="flex items-center gap-3 p-3 hover:bg-gray-800 rounded-lg text-left transition-colors opacity-50 cursor-not-allowed">
-                                            <span className="w-4 h-4 flex items-center justify-center text-xs">💬</span>
-                                            <span className="text-sm text-gray-200">KakaoTalk</span>
-                                        </button>
-                                        <button className="flex items-center gap-3 p-3 hover:bg-gray-800 rounded-lg text-left transition-colors opacity-50 cursor-not-allowed">
-                                            <span className="w-4 h-4 flex items-center justify-center text-xs">📷</span>
-                                            <span className="text-sm text-gray-200">Instagram</span>
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
                         </div>
                     </div>
 
@@ -410,32 +455,25 @@ export default function ResultPage() {
                             className="max-w-full max-h-full object-contain drop-shadow-2xl"
                         />
                     </div>
-
-                    {/* Share Message Toast */}
-                    {shareMessage && (
-                        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white/90 text-black px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-bounce">
-                            {shareMessage}
-                        </div>
-                    )}
                 </div>
             )}
 
-            {/* Advanced Generation Modals */}
+            {/* Advanced Generation Modals - wrapped with history Close */}
             <TimeChangeModal
                 isOpen={showTimeChangeModal}
-                onClose={() => setShowTimeChangeModal(false)}
+                onClose={() => closeModal()}
                 userImagePath={resultImage || ''}
                 styleName={style.name}
             />
             <MultiAngleModal
                 isOpen={showMultiAngleModal}
-                onClose={() => setShowMultiAngleModal(false)}
+                onClose={() => closeModal()}
                 userImagePath={resultImage || ''}
                 styleName={style.name}
             />
             <PoseModal
                 isOpen={showPoseModal}
-                onClose={() => setShowPoseModal(false)}
+                onClose={() => closeModal()}
                 userImagePath={resultImage || ''}
                 styleName={style.name}
             />

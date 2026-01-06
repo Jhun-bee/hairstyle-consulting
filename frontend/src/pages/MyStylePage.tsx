@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, Trash2, Download, Share2, Check, X } from 'lucide-react';
+import { ArrowLeft, Trash2, Download, Share2, Check } from 'lucide-react';
 
 interface SavedStyle {
     id: string;

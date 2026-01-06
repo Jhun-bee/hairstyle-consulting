@@ -4,6 +4,19 @@
 
 ---
 
+## 🔧 v0.5.1 (2026-01-06) - Image Loading Fix & Cleanup
+
+### Data Deduplication
+- `styles.json` 정제 작업 수행
+- 중복된 스타일 이름(괄호 포함 등) 제거하여 **데이터 일관성** 확보
+
+### Network Access & Image Loading
+- **문제점**: 로컬(localhost)에서는 이미지가 잘 나오나, 외부 기기(모바일 등) 접속 시 이미지 경로가 `localhost`를 가리켜 **엑박(Broken Image)** 발생
+- **해결책**:
+  - **Vite Proxy 확장**: `/uploads`, `/results` 경로도 백엔드로 포워딩하도록 설정 (`vite.config.ts`)
+  - **Relative Path 전환**: 프론트엔드 코드 내 모든 하드코딩된 URL(`http://hostname:8000`) 제거 및 상대 경로(`/api/...`) 사용
+- **결과**: 어떤 네트워크 환경에서도 이미지가 정상적으로 로딩됨 ✅
+
 ## 🚀 v0.5.0 (2026-01-05) - UI Overhaul
 
 ### UI/UX 전면 개편

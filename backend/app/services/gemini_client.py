@@ -39,6 +39,7 @@ class GeminiClient:
             self.recommendation_model_id = 'gemini-3-flash-preview'
             
             # Image: Revert to Nano Banana (Gemini 3 Pro Image was failing with 206 byte files)
+            # User requested to use 2.5-flash-image
             self.imagen_model_id = 'gemini-2.5-flash-image'
             
         except Exception as e:
@@ -124,8 +125,6 @@ class GeminiClient:
             )
             
             # Use Gemini 2.5 Flash Image (or fallback to 2.0-flash-exp as configured)
-            # The original code used 2.0-flash-exp. 
-            # We will use 'gemini-2.0-flash-exp' to match the friend's functional code.
             contents = [prompt, original_img]
             
             response = self.client.models.generate_content(
@@ -411,46 +410,52 @@ class GeminiClient:
             from PIL import ImageOps
             original_img = Image.open(user_image_path)
             original_img = ImageOps.exif_transpose(original_img)
+            # Ensure RGB to avoid 500 errors with RGBA PNGs
+            original_img = original_img.convert('RGB')
             
             for key, korean_label, growth_desc in time_periods:
-                prompt = f"""
-                Show how this hairstyle "{style_name}" would look after hair growth.
-                Time passed: {korean_label} ({growth_desc})
-                
-                RULES:
-                1. Keep the same face, skin tone, and facial features EXACTLY.
-                2. The hairstyle should be the same style but with natural hair growth.
-                3. **BANGS/FRINGE GROWTH**: If there are bangs/fringe, they MUST grow longer naturally down the forehead/eyes. Do NOT keep them short or curled unnaturally.
-                4. Avoid unnatural "comma" shapes or perfect geometric curls. Hair should fall naturally with gravity.
-                5. Keep the original hair color - do NOT change it.
-                6. Photorealistic, high quality output.
-                7. Same image orientation and angle as input.
-                """
-                
-                if seed is not None:
-                    prompt += f"\n<!-- Variation Seed: {seed} -->"
-                
-                response = self.client.models.generate_content(
-                    model=self.imagen_model_id,
-                    contents=[prompt, original_img],
-                    config=types.GenerateContentConfig(
-                        response_modalities=["image", "text"],
+                try:
+                    prompt = f"""
+                    Show how this hairstyle "{style_name}" would look after hair growth.
+                    Time passed: {korean_label} ({growth_desc})
+                    
+                    RULES:
+                    1. Keep the same face, skin tone, and facial features EXACTLY.
+                    2. The hairstyle should be the same style but with natural hair growth.
+                    3. **BANGS/FRINGE GROWTH**: If there are bangs/fringe, they MUST grow longer naturally down the forehead/eyes. Do NOT keep them short or curled unnaturally.
+                    4. Avoid unnatural "comma" shapes or perfect geometric curls. Hair should fall naturally with gravity.
+                    5. Keep the original hair color - do NOT change it.
+                    6. Photorealistic, high quality output.
+                    7. Same image orientation and angle as input.
+                    """
+                    
+                    if seed is not None:
+                        prompt += f"\n<!-- Variation Seed: {seed} -->"
+                    
+                    response = self.client.models.generate_content(
+                        model=self.imagen_model_id,
+                        contents=[prompt, original_img],
+                        config=types.GenerateContentConfig(
+                            response_modalities=["image", "text"],
+                        )
                     )
-                )
-                
-                if response.candidates and response.candidates[0].content.parts:
-                    for part in response.candidates[0].content.parts:
-                        if hasattr(part, 'inline_data') and part.inline_data:
-                            filename = f"time_{key}_{os.urandom(4).hex()}.png"
-                            save_path = os.path.join("results", filename)
-                            os.makedirs("results", exist_ok=True)
-                            with open(save_path, 'wb') as f:
-                                f.write(part.inline_data.data)
-                            results[key] = f"/results/{filename}"
-                            break
-                
-                if key not in results:
-                    results[key] = "https://placehold.co/400x600?text=Generation+Failed"
+                    
+                    if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
+                        for part in response.candidates[0].content.parts:
+                            if hasattr(part, 'inline_data') and part.inline_data:
+                                filename = f"time_{key}_{os.urandom(4).hex()}.png"
+                                save_path = os.path.join("results", filename)
+                                os.makedirs("results", exist_ok=True)
+                                with open(save_path, 'wb') as f:
+                                    f.write(part.inline_data.data)
+                                results[key] = f"/results/{filename}"
+                                break
+                    
+                    if key not in results:
+                        results[key] = "https://placehold.co/400x600?text=Generation+Failed"
+                except Exception as e:
+                    print(f"Error generating time change for {key}: {e}")
+                    results[key] = "https://placehold.co/400x600?text=Error"
                     
         except Exception as e:
             print(f"Error in time change generation: {e}")
@@ -479,51 +484,57 @@ class GeminiClient:
             from PIL import ImageOps
             original_img = Image.open(user_image_path)
             original_img = ImageOps.exif_transpose(original_img)
+            # Ensure RGB
+            original_img = original_img.convert('RGB')
             
             for key, korean_label, angle_desc in angles:
-                prompt = f"""
-                Show this EXACT person with the EXACT same hairstyle from a different viewing angle.
-                Requested Angle: {korean_label} ({angle_desc})
-                
-                CRITICAL HAIR CONSISTENCY RULES:
-                1. The hairstyle MUST be EXACTLY the same as shown in the input image.
-                2. If the hair is down/loose in the input, it MUST remain down/loose from all angles.
-                3. DO NOT add ponytails, buns, braids, or any hair accessories that are not in the input.
-                4. DO NOT change the hair length, volume, or texture.
-                5. Hair color must remain EXACTLY the same.
-                6. The hairstyle "{style_name}" characteristics must be consistent from all angles.
-                
-                OTHER RULES:
-                7. Keep the same person's face, skin tone, and body EXACTLY.
-                8. Only change the viewing angle to: {angle_desc}.
-                9. Photorealistic, high quality output with consistent lighting.
-                10. Same clothing and background style.
-                """
-                
-                if seed is not None:
-                    prompt += f"\n<!-- Variation Seed: {seed} -->"
-
-                response = self.client.models.generate_content(
-                    model=self.imagen_model_id,
-                    contents=[prompt, original_img],
-                    config=types.GenerateContentConfig(
-                        response_modalities=["image", "text"],
+                try:
+                    prompt = f"""
+                    Show this EXACT person with the EXACT same hairstyle from a different viewing angle.
+                    Requested Angle: {korean_label} ({angle_desc})
+                    
+                    CRITICAL HAIR CONSISTENCY RULES:
+                    1. The hairstyle MUST be EXACTLY the same as shown in the input image.
+                    2. If the hair is down/loose in the input, it MUST remain down/loose from all angles.
+                    3. DO NOT add ponytails, buns, braids, or any hair accessories that are not in the input.
+                    4. DO NOT change the hair length, volume, or texture.
+                    5. Hair color must remain EXACTLY the same.
+                    6. The hairstyle "{style_name}" characteristics must be consistent from all angles.
+                    
+                    OTHER RULES:
+                    7. Keep the same person's face, skin tone, and body EXACTLY.
+                    8. Only change the viewing angle to: {angle_desc}.
+                    9. Photorealistic, high quality output with consistent lighting.
+                    10. Same clothing and background style.
+                    """
+                    
+                    if seed is not None:
+                        prompt += f"\n<!-- Variation Seed: {seed} -->"
+    
+                    response = self.client.models.generate_content(
+                        model=self.imagen_model_id,
+                        contents=[prompt, original_img],
+                        config=types.GenerateContentConfig(
+                            response_modalities=["image", "text"],
+                        )
                     )
-                )
-                
-                if response.candidates and response.candidates[0].content.parts:
-                    for part in response.candidates[0].content.parts:
-                        if hasattr(part, 'inline_data') and part.inline_data:
-                            filename = f"angle_{key}_{os.urandom(4).hex()}.png"
-                            save_path = os.path.join("results", filename)
-                            os.makedirs("results", exist_ok=True)
-                            with open(save_path, 'wb') as f:
-                                f.write(part.inline_data.data)
-                            results[key] = f"/results/{filename}"
-                            break
-                
-                if key not in results:
-                    results[key] = "https://placehold.co/400x600?text=Generation+Failed"
+                    
+                    if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
+                        for part in response.candidates[0].content.parts:
+                            if hasattr(part, 'inline_data') and part.inline_data:
+                                filename = f"angle_{key}_{os.urandom(4).hex()}.png"
+                                save_path = os.path.join("results", filename)
+                                os.makedirs("results", exist_ok=True)
+                                with open(save_path, 'wb') as f:
+                                    f.write(part.inline_data.data)
+                                results[key] = f"/results/{filename}"
+                                break
+                    
+                    if key not in results:
+                        results[key] = "https://placehold.co/400x600?text=Generation+Failed"
+                except Exception as e:
+                    print(f"Error generating angle {key}: {e}")
+                    results[key] = "https://placehold.co/400x600?text=Error"
                     
         except Exception as e:
             print(f"Error in multi-angle generation: {e}")
@@ -585,47 +596,49 @@ class GeminiClient:
             from PIL import ImageOps
             original_img = Image.open(user_image_path)
             original_img = ImageOps.exif_transpose(original_img)
+            # Ensure RGB
+            original_img = original_img.convert('RGB')
             
             for i, scene_prompt in enumerate(config["prompts"]):
-                prompt = f"""
-                Create a stunning photoshoot image of this person with hairstyle "{style_name}".
-                Scene: {scene_prompt}
-                
-                RULES:
-                1. Keep the same person's face and identity EXACTLY.
-                2. Apply the hairstyle "{style_name}" perfectly styled for this scene.
-                3. Create a professional, magazine-quality photograph.
-                4. Match the lighting and mood to the scene description.
-                5. The person should have a natural, confident pose.
-                6. Keep the original hair color.
-                7. High resolution, photorealistic output.
-                """
-                
-                if seed is not None:
-                    prompt += f"\n<!-- Variation Seed: {seed} -->"
+                try:
+                    prompt = f"""
+                    Create a stunning photoshoot image of this person with hairstyle "{style_name}".
+                    Scene: {scene_prompt}
+                    
+                    RULES:
+                    1. Keep the same face, skin tone, and body structure EXACTLY.
+                    2. The hairstyle MUST be "{style_name}" as shown in input.
+                    3. High fashion, editorial quality.
+                    4. Consistent lighting and mood matching the description.
+                    """
+                    
+                    if seed is not None:
+                         prompt += f"\n<!-- Variation Seed: {seed + i} -->"
 
-                response = self.client.models.generate_content(
-                    model=self.imagen_model_id,
-                    contents=[prompt, original_img],
-                    config=types.GenerateContentConfig(
-                        response_modalities=["image", "text"],
+                    response = self.client.models.generate_content(
+                        model=self.imagen_model_id,
+                        contents=[prompt, original_img],
+                        config=types.GenerateContentConfig(
+                            response_modalities=["image", "text"],
+                        )
                     )
-                )
-                
-                if response.candidates and response.candidates[0].content.parts:
-                    for part in response.candidates[0].content.parts:
-                        if hasattr(part, 'inline_data') and part.inline_data:
-                            filename = f"pose_{scene_type}_{i}_{os.urandom(4).hex()}.png"
-                            save_path = os.path.join("results", filename)
-                            os.makedirs("results", exist_ok=True)
-                            with open(save_path, 'wb') as f:
-                                f.write(part.inline_data.data)
-                            results["images"].append(f"/results/{filename}")
-                            break
-                
-                # Fallback for this image
-                if len(results["images"]) <= i:
-                    results["images"].append("https://placehold.co/400x600?text=Generation+Failed")
+                    
+                    img_url = "https://placehold.co/400x600?text=Generation+Failed"
+                    if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
+                        for part in response.candidates[0].content.parts:
+                            if hasattr(part, 'inline_data') and part.inline_data:
+                                filename = f"pose_{scene_type}_{i}_{os.urandom(4).hex()}.png"
+                                save_path = os.path.join("results", filename)
+                                os.makedirs("results", exist_ok=True)
+                                with open(save_path, 'wb') as f:
+                                    f.write(part.inline_data.data)
+                                img_url = f"/results/{filename}"
+                                break
+                    
+                    results["images"].append(img_url)
+                except Exception as e:
+                    print(f"Error generating pose {i}: {e}")
+                    results["images"].append("https://placehold.co/400x600?text=Error")
                     
         except Exception as e:
             print(f"Error in pose generation: {e}")

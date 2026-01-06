@@ -4,6 +4,21 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.5.1] - 2026-01-06
+
+### 🧹 Data Cleanup
+- **중복 스타일 deduplication**: `styles.json`에서 괄호 `( )`가 포함된 중복 스타일(5종) 삭제
+- 데이터 무결성 검증 완료
+
+### 🌐 Network & Access
+- **로컬 네트워크 이미지 로딩 완벽 지원**:
+  - `vite.config.ts`: `/uploads`, `/results` 경로에 대한 프록시 설정 추가
+  - **Hardcoded URL 제거**: 모든 프론트엔드 코드(`pages`, `components`, `api.ts`)에서 `window.location.hostname` 의존 로직 제거 및 **Relative Path**로 전환
+  - 이제 외부 기기에서 접속해도(예: 192.168.0.x) 이미지가 깨지지 않음
+
+### 🐛 Fixed
+- 모바일/외부 접속 시 썸네일 및 결과 이미지 엑박(Broken Image) 현상 해결
+
 ## [v0.5.0] - 2026-01-05
 
 ### ✨ UI Overhaul
