@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.13] - 2026-01-17
+
+### 🐛 Fixed
+- **Internal Error**: Hybrid Handler 내부의 `AttributeError` 수정 (`FastMCP` wrapper 대신 `_mcp_server` 내부 인스턴스 호출)
+- **Robustness**: JSON-RPC `initialize`, `tools/list`, `tools/call` 정상 동작 확인
+
+---
+
 ## [v0.6.12] - 2026-01-17
 
 ### 🐛 Fixed

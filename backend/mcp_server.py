@@ -322,7 +322,7 @@ async def handle_sse_coalesced(request: Request):
             if method == "initialize":
                 result = {
                     "protocolVersion": "2024-11-05",
-                    "capabilities": mcp.get_capabilities(),
+                    "capabilities": mcp._mcp_server.get_capabilities(),
                     "serverInfo": {"name": "hair-omakase", "version": "0.1.0"}
                 }
             elif method == "notifications/initialized":
@@ -331,13 +331,13 @@ async def handle_sse_coalesced(request: Request):
             elif method == "ping":
                 result = {}
             elif method == "tools/list":
-                tools = await mcp.list_tools()
+                tools = await mcp._mcp_server.list_tools()
                 # Serialize Pydantic models
                 result = {"tools": [t.model_dump() for t in tools]}
             elif method == "tools/call":
                 name = params.get("name")
                 args = params.get("arguments", {})
-                tool_result = await mcp.call_tool(name, args)
+                tool_result = await mcp._mcp_server.call_tool(name, args)
                 # Tool result is usually a list of Content objects
                 result = {"content": [c.model_dump() for c in tool_result]}
             else:
