@@ -233,9 +233,7 @@ async def generate_hairstyle(image_base64: str, style_name: str, gender: str = "
         }
 
 
-# Run the server
-if __name__ == "__main__":
-    
+
 # ------------------------------------------------------------------------------
 # PlayMCP Integration (FastAPI Wrapper)
 # ------------------------------------------------------------------------------

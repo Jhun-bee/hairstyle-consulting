@@ -4,6 +4,13 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.4] - 2026-01-17
+
+### 🐛 Fixed
+- **Server Crash**: `mcp_server.py` 들여쓰기 오류 수정 (FastAPI Wrapper Global Scope 이동)
+
+---
+
 ## [v0.6.3] - 2026-01-17
 
 ### 🐛 Fixed
