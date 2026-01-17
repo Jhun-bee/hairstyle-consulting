@@ -325,7 +325,7 @@ async def handle_sse_coalesced(request: Request):
                     "capabilities": mcp._mcp_server.get_capabilities(
                         notification_options=mcp._mcp_server.notification_options,
                         experimental_capabilities={}
-                    ),
+                    ).model_dump(),
                     "serverInfo": {"name": "hair-omakase", "version": "0.1.0"}
                 }
             elif method == "notifications/initialized":

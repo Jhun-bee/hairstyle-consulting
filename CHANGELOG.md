@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.15] - 2026-01-17
+
+### 🐛 Fixed
+- **Critical Crash**: `get_capabilities()` 리턴값(Pydantic Model)을 `JSONResponse`가 직렬화하지 못해 발생하던 500 에러 수정 (`.model_dump()` 추가)
+- **Verified**: 원격 검증 스크립트로 HTTPS POST/GET 완전 정상 동작 확인 예정
+
+---
+
 ## [v0.6.14] - 2026-01-17
 
 ### 🐛 Fixed
