@@ -4,6 +4,27 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.0] - 2026-01-17
+
+### 🚀 MCP Server for PlayMCP
+- **MCP 서버 구현**: Kakao PlayMCP 공모전 출품을 위한 MCP 서버 추가
+- **4개 MCP Tools**:
+  - `get_available_styles` - 헤어스타일 목록 조회 (50종)
+  - `analyze_face` - AI 얼굴 분석 (얼굴형, 피부톤)
+  - `recommend_styles` - 맞춤 스타일 추천
+  - `generate_hairstyle` - 가상 피팅 이미지 생성
+
+### ➕ Added
+- `backend/mcp_server.py` - FastMCP 기반 MCP 서버
+- `backend/Dockerfile` - 클라우드 배포용
+- `backend/pyproject.toml` - 패키지 설정
+- `backend/MCP_README.md` - MCP 가이드
+
+### 🔧 Changed
+- `requirements.txt` - FastMCP 의존성 추가
+
+---
+
 ## [v0.5.1] - 2026-01-06
 
 ### ✨ New & Improved

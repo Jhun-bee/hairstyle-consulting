@@ -70,3 +70,40 @@ original_img = original_img.convert('RGB') # Fix for RGBA/Palette images
 *   Partial failure scenarios handled gracefully.
 
 **Version**: `v0.5.1`
+
+---
+
+## MCP Server Implementation (v0.6.0)
+
+**Goal**: Kakao PlayMCP 공모전 출품을 위한 MCP 서버 구현
+
+### 구현 내용
+
+**새 파일들**:
+- `backend/mcp_server.py` - FastMCP 기반 MCP 서버 (4개 Tools)
+- `backend/Dockerfile` - 클라우드 배포용
+- `backend/pyproject.toml` - 패키지 설정
+- `backend/MCP_README.md` - MCP 가이드
+
+**MCP Tools**:
+
+| Tool | 기능 |
+|------|------|
+| `get_available_styles` | 헤어스타일 목록 조회 (50종) |
+| `analyze_face` | AI 얼굴 분석 (얼굴형, 피부톤) |
+| `recommend_styles` | 맞춤 스타일 3개 추천 |
+| `generate_hairstyle` | 가상 피팅 이미지 생성 |
+
+**의존성**:
+- FastMCP v2.14.3 추가 (`requirements.txt`)
+
+### Verification
+- FastMCP 설치 완료
+- MCP 서버 import 테스트 통과 (`from mcp_server import mcp`)
+
+### 다음 단계
+1. Railway/Render 배포
+2. PlayMCP 개발자 콘솔 등록
+3. 심사 요청 → 공모전 응모
+
+**Version**: `v0.6.0`

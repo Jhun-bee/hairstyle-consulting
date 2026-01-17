@@ -1,19 +1,19 @@
-# 🎨 Hair Omakase - AI 헤어 컨설팅 서비스 (v0.5.1)
+# 🎨 Hair Omakase - AI 헤어 컨설팅 서비스 (v0.6.0)
 
 사용자의 사진을 업로드하면 **AI가 얼굴형을 분석**하여 맞춤 헤어스타일을 추천하고, **가상 피팅**으로 결과를 미리 보여주는 서비스입니다.
 
 ---
 
-## ✨ v0.5.1 업데이트 (2026-01-06)
+## ✨ v0.6.0 업데이트 (2026-01-17)
 
 | 변경사항 | 설명 |
 |:---|:---|
-| 📱 **Mobile Fix** | 모바일 이미지 업로드 시 **500 에러 해결** (RGBA 포맷 자동 변환) |
-| 🔙 **Navigation** | 모달 및 줌 화면에서 뒤로가기 버튼 지원, **결과 화면 뒤로가기시 재생성 방지** |
-| ⚡ **Stability** | 시간변화/다각도/포즈 생성 안정성 강화 (부분 성공 지원, 422/500 에러 해결) |
-| 🧹 **Data Cleanup** | 중복 스타일 이름 제거 및 무결성 검증 완료 |
-| 🌐 **Network Access** | **로컬 네트워크 접속 완벽 지원**. 외부 기기(모바일 등)에서 접속 시 **이미지 엑박 문제 해결** |
-| 🔗 **Proxy Config** | `/uploads`, `/results` 경로 프록시 설정으로 안정적인 이미지 서빙 기능 |
+| 🔌 **MCP Server** | Kakao PlayMCP 공모전용 **MCP 서버 추가** - AI 에이전트 연동 가능 |
+| 🛠️ **4개 MCP Tools** | `analyze_face`, `recommend_styles`, `generate_hairstyle`, `get_available_styles` |
+| 🐳 **Docker 지원** | 클라우드 배포(Railway/Render)를 위한 Dockerfile 추가 |
+| 📦 **패키지 설정** | `pyproject.toml` 추가로 pip 설치 가능 |
+
+## ✨ v0.5.1 (2026-01-06)
 
 ## ✨ 핵심 기능
 

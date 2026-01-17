@@ -21,3 +21,6 @@ google-genai==1.56.0
 
 # Image Processing (also used for photo booth composition)
 pillow==12.0.0
+
+# MCP Server (for PlayMCP)
+fastmcp>=2.0.0
