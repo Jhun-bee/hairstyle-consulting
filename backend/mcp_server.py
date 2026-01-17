@@ -236,12 +236,20 @@ async def generate_hairstyle(image_base64: str, style_name: str, gender: str = "
 
 
 # ------------------------------------------------------------------------------
-# PlayMCP Integration (Native FastMCP)
+# PlayMCP Integration (Manual FastAPI + SseServerTransport)
 # ------------------------------------------------------------------------------
+import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from mcp.server.sse import SseServerTransport
+from starlette.responses import Response
 
-# Add CORS middleware (Required for PlayMCP)
-mcp.add_middleware(
+# Create FastAPI app
+app = FastAPI(title="Hair Omakase MCP Server")
+
+# Add CORS middleware
+app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
@@ -249,11 +257,14 @@ mcp.add_middleware(
     allow_headers=["*"],
 )
 
-@mcp.custom_route("/")
+# Initialize SSE Transport
+sse = SseServerTransport("/messages")
+
+@app.get("/")
 async def health_check():
     """Root endpoint for health check"""
     return {
-        "status": "healthy", 
+        "status": "healthy",
         "service": "Hair Omakase MCP Server",
         "endpoints": {
             "sse": "/sse",
@@ -261,10 +272,22 @@ async def health_check():
         }
     }
 
+async def sse_handler(scope, receive, send):
+    """Raw ASGI handler for SSE connection"""
+    async with sse.connect_sse(scope, receive, send) as streams:
+        await mcp._mcp_server.run(
+            streams[0], 
+            streams[1], 
+            mcp._mcp_server.create_initialization_options()
+        )
+
+# Mount Raw ASGI handlers for SseServerTransport
+app.mount("/sse", sse_handler)
+app.mount("/messages", sse.handle_post_message)
+
 # Run the server
 if __name__ == "__main__":
     # Railway sets the PORT environment variable
     import os
     port = int(os.environ.get("PORT", 8080))
-    # mcp.run() will use the configured port and listen on 0.0.0.0 by default or via args
-    mcp.run(transport="sse", host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port)

@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.9] - 2026-01-17
+
+### ♻️ Refactor
+- **MCP Server**: FastMCP 내부 동작을 수동 ASGI 마운팅으로 재구현 (`SseServerTransport` + `FastAPI.mount`)
+- **Fix**: FastAPI `request._send` 사용으로 인한 Internal Server Error 해결 (Raw ASGI Scope 사용)
+
+---
+
 ## [v0.6.8] - 2026-01-17
 
 ### 🐛 Fixed
