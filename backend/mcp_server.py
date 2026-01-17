@@ -272,18 +272,30 @@ async def health_check():
         }
     }
 
-async def sse_handler(scope, receive, send):
-    """Raw ASGI handler for SSE connection"""
-    async with sse.connect_sse(scope, receive, send) as streams:
-        await mcp._mcp_server.run(
-            streams[0], 
-            streams[1], 
-            mcp._mcp_server.create_initialization_options()
-        )
+class MCPSSEResponse(Response):
+    """Custom Response to handle SSE connection via ASGI"""
+    async def __call__(self, scope, receive, send):
+        async with sse.connect_sse(scope, receive, send) as streams:
+            await mcp._mcp_server.run(
+                streams[0], 
+                streams[1], 
+                mcp._mcp_server.create_initialization_options()
+            )
 
-# Mount Raw ASGI handlers for SseServerTransport
-app.mount("/sse", sse_handler)
-app.mount("/messages", sse.handle_post_message)
+class MCPMessagesResponse(Response):
+    """Custom Response to handle Messages via ASGI"""
+    async def __call__(self, scope, receive, send):
+        await sse.handle_post_message(scope, receive, send)
+
+@app.get("/sse")
+async def handle_sse():
+    """SSE Endpoint"""
+    return MCPSSEResponse()
+
+@app.post("/messages")
+async def handle_messages():
+    """Messages Endpoint"""
+    return MCPMessagesResponse()
 
 # Run the server
 if __name__ == "__main__":

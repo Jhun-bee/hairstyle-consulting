@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.10] - 2026-01-17
+
+### 🐛 Fixed
+- **Routing**: `app.mount`로 인한 307 Redirect 문제 해결 (Custom Response Class 적용)
+- **Stability**: `/sse` 및 `/messages` 경로 직접 처리로 PlayMCP 연결 안정성 확보
+
+---
+
 ## [v0.6.9] - 2026-01-17
 
 ### ♻️ Refactor
