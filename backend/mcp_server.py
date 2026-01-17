@@ -234,27 +234,22 @@ async def generate_hairstyle(image_base64: str, style_name: str, gender: str = "
 
 
 
+
 # ------------------------------------------------------------------------------
-# PlayMCP Integration (FastAPI Wrapper)
+# PlayMCP Integration (Native FastMCP)
 # ------------------------------------------------------------------------------
-import uvicorn
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-# Create FastAPI app
-app = FastAPI(title="Hair Omakase MCP Server")
-
 # Add CORS middleware (Required for PlayMCP)
-app.add_middleware(
+mcp.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for PlayMCP
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
+@mcp.custom_route("/")
 async def health_check():
     """Root endpoint for health check"""
     return {
@@ -266,13 +261,10 @@ async def health_check():
         }
     }
 
-# Mount MCP Server to FastAPI app
-# mcp.http_app() returns the underlying Starlette/FastAPI app configured by FastMCP
-mcp_app = mcp.http_app()
-app.mount("/", mcp_app)
-
 # Run the server
 if __name__ == "__main__":
     # Railway sets the PORT environment variable
+    import os
     port = int(os.environ.get("PORT", 8080))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    # mcp.run() will use the configured port and listen on 0.0.0.0 by default or via args
+    mcp.run(transport="sse", host="0.0.0.0", port=port)

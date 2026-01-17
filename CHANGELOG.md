@@ -4,6 +4,13 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.7] - 2026-01-17
+
+### ♻️ Refactor
+- **MCP Server**: Native FastMCP `custom_route` & `add_middleware` 적용 (최적화 및 500 에러 완전 해결)
+
+---
+
 ## [v0.6.6] - 2026-01-17
 
 ### ♻️ Refactor
