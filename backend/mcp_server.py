@@ -241,7 +241,6 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from sse_starlette.sse import EventSourceResponse
 
 # Create FastAPI app
 app = FastAPI(title="Hair Omakase MCP Server")
@@ -267,21 +266,9 @@ async def health_check():
         }
     }
 
-@app.get("/sse")
-async def handle_sse(request: Request):
-    """SSE Endpoint for MCP"""
-    async with mcp.sse.connect_sse(request.scope, request.receive, request._send) as streams:
-        return EventSourceResponse(
-            streams[0],
-            media_type="text/event-stream",
-            ping=5
-        )
-
-@app.post("/messages")
-async def handle_messages(request: Request):
-    """Messages Endpoint for MCP"""
-    await mcp.sse.handle_post_message(request.scope, request.receive, request._send)
-    return JSONResponse(content={"status": "ok"})
+# Mount MCP Server to FastAPI app
+# This automatically adds /sse and /messages endpoints
+mcp.mount(app)
 
 # Run the server
 if __name__ == "__main__":

@@ -4,6 +4,13 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.5] - 2026-01-17
+
+### ♻️ Refactor
+- **MCP Server**: `mcp.mount(app)` 사용으로 SSE 구현 단순화 및 안정화 (500 에러 해결)
+
+---
+
 ## [v0.6.4] - 2026-01-17
 
 ### 🐛 Fixed
