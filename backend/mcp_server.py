@@ -322,7 +322,10 @@ async def handle_sse_coalesced(request: Request):
             if method == "initialize":
                 result = {
                     "protocolVersion": "2024-11-05",
-                    "capabilities": mcp._mcp_server.get_capabilities(),
+                    "capabilities": mcp._mcp_server.get_capabilities(
+                        notification_options=mcp._mcp_server.notification_options,
+                        experimental_capabilities={}
+                    ),
                     "serverInfo": {"name": "hair-omakase", "version": "0.1.0"}
                 }
             elif method == "notifications/initialized":

@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.14] - 2026-01-17
+
+### 🐛 Fixed
+- **Internal Error**: `get_capabilities()` 호출 시 필수 인자(`notification_options`, `experimental_capabilities`) 누락 수정
+- **Stability**: Hybrid Protocol 핸들러가 이제 완전히 에러 없이 초기화(Initialize)를 처리함
+
+---
+
 ## [v0.6.13] - 2026-01-17
 
 ### 🐛 Fixed

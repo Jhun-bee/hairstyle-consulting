@@ -28,8 +28,14 @@ try:
 
     # Test 2: GET (SSE)
     print("\nTesting GET (SSE)...")
-    resp_get = requests.get(URL, stream=True, timeout=5)
+    headers = {"Origin": "https://playmcp.co"}
+    resp_get = requests.get(URL, stream=True, timeout=5, headers=headers)
     print(f"GET Status: {resp_get.status_code}")
+    print(f"GET Headers: {dict(resp_get.headers)}")
+    
+    if "access-control-allow-origin" not in {k.lower(): v for k, v in resp_get.headers.items()}:
+        print("WARNING: CORS Header Missing!")
+    
     # Read a bit of stream
     for line in resp_get.iter_lines():
         if line:
@@ -41,7 +47,7 @@ try:
         sys.exit(1)
         
     print("\nSUCCESS: Hybrid endpoint is working!")
-
+    
 except Exception as e:
     print(f"Verification Failed: {e}")
     sys.exit(1)
