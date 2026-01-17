@@ -4,6 +4,13 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.1] - 2026-01-17
+
+### 🔧 Fixed
+- **MCP Server Transport**: stdio → SSE 변경 (PlayMCP HTTP 엔드포인트 호환)
+
+---
+
 ## [v0.6.0] - 2026-01-17
 
 ### 🚀 MCP Server for PlayMCP
