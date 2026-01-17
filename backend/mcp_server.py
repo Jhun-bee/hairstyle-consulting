@@ -258,9 +258,10 @@ app.add_middleware(
 )
 
 # Initialize SSE Transport
-sse = SseServerTransport("/messages")
+# Advertise /sse as the endpoint for messages as well
+sse = SseServerTransport("/sse")
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "POST"])
 async def health_check():
     """Root endpoint for health check"""
     return {
@@ -268,7 +269,7 @@ async def health_check():
         "service": "Hair Omakase MCP Server",
         "endpoints": {
             "sse": "/sse",
-            "messages": "/messages"
+            "messages": "/sse"
         }
     }
 
@@ -287,14 +288,19 @@ class MCPMessagesResponse(Response):
     async def __call__(self, scope, receive, send):
         await sse.handle_post_message(scope, receive, send)
 
-@app.get("/sse")
-async def handle_sse():
-    """SSE Endpoint"""
-    return MCPSSEResponse()
+@app.api_route("/sse", methods=["GET", "POST"])
+async def handle_sse_coalesced(request: Request):
+    """Combined SSE Endpoint (GET for Stream, POST for Messages)"""
+    if request.method == "GET":
+        return MCPSSEResponse()
+    elif request.method == "POST":
+        return MCPMessagesResponse()
+    return Response(status_code=405)
 
+# Keep /messages as alias just in case
 @app.post("/messages")
 async def handle_messages():
-    """Messages Endpoint"""
+    """Messages Endpoint (Alias)"""
     return MCPMessagesResponse()
 
 # Run the server

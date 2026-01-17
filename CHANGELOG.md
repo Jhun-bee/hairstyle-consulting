@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.11] - 2026-01-17
+
+### 🐛 Fixed
+- **Endpoint**: `/sse` 경로에서 GET(Stream)과 POST(Message) 모두 지원하도록 통합 (PlayMCP 호환성 해결)
+- **Robustness**: Root Endpoint에서도 POST 허용
+
+---
+
 ## [v0.6.10] - 2026-01-17
 
 ### 🐛 Fixed
