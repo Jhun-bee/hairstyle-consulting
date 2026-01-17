@@ -235,8 +235,58 @@ async def generate_hairstyle(image_base64: str, style_name: str, gender: str = "
 
 # Run the server
 if __name__ == "__main__":
-    # Run as HTTP/SSE server for PlayMCP
+    
+# ------------------------------------------------------------------------------
+# PlayMCP Integration (FastAPI Wrapper)
+# ------------------------------------------------------------------------------
+import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from sse_starlette.sse import EventSourceResponse
+
+# Create FastAPI app
+app = FastAPI(title="Hair Omakase MCP Server")
+
+# Add CORS middleware (Required for PlayMCP)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for PlayMCP
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+async def health_check():
+    """Root endpoint for health check"""
+    return {
+        "status": "healthy", 
+        "service": "Hair Omakase MCP Server",
+        "endpoints": {
+            "sse": "/sse",
+            "messages": "/messages"
+        }
+    }
+
+@app.get("/sse")
+async def handle_sse(request: Request):
+    """SSE Endpoint for MCP"""
+    async with mcp.sse.connect_sse(request.scope, request.receive, request._send) as streams:
+        return EventSourceResponse(
+            streams[0],
+            media_type="text/event-stream",
+            ping=5
+        )
+
+@app.post("/messages")
+async def handle_messages(request: Request):
+    """Messages Endpoint for MCP"""
+    await mcp.sse.handle_post_message(request.scope, request.receive, request._send)
+    return JSONResponse(content={"status": "ok"})
+
+# Run the server
+if __name__ == "__main__":
     # Railway sets the PORT environment variable
-    import os
     port = int(os.environ.get("PORT", 8080))
-    mcp.run(transport="sse", host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port)

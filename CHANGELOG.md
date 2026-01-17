@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.3] - 2026-01-17
+
+### 🐛 Fixed
+- **PlayMCP Connectivity**: FastAPI Wrapper 적용 (Root Health Check, CORS 추가)
+- **Dependency**: `sse-starlette` 추가
+
+---
+
 ## [v0.6.2] - 2026-01-17
 
 ### 🐛 Fixed
