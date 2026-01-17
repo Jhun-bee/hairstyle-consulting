@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.12] - 2026-01-17
+
+### 🐛 Fixed
+- **Hybrid Protocol**: `/sse` 엔드포인트에서 SSE Session이 없는 POST 요청도 Stateless JSON-RPC로 처리하도록 개선 (PlayMCP "Request without session_id" 에러 해결)
+- **Feature**: `initialize`, `tools/list`, `tools/call` 수동 핸들링 추가
+
+---
+
 ## [v0.6.11] - 2026-01-17
 
 ### 🐛 Fixed

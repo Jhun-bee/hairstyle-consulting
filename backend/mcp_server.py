@@ -239,11 +239,13 @@ async def generate_hairstyle(image_base64: str, style_name: str, gender: str = "
 # PlayMCP Integration (Manual FastAPI + SseServerTransport)
 # ------------------------------------------------------------------------------
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from mcp.server.sse import SseServerTransport
 from starlette.responses import Response
+import mcp.types as types
+from pydantic import ValidationError
 
 # Create FastAPI app
 app = FastAPI(title="Hair Omakase MCP Server")
@@ -290,11 +292,71 @@ class MCPMessagesResponse(Response):
 
 @app.api_route("/sse", methods=["GET", "POST"])
 async def handle_sse_coalesced(request: Request):
-    """Combined SSE Endpoint (GET for Stream, POST for Messages)"""
+    """Combined SSE Endpoint (GET for Stream, POST for Messages/Stateless)"""
     if request.method == "GET":
         return MCPSSEResponse()
+    
     elif request.method == "POST":
-        return MCPMessagesResponse()
+        # Check for Session ID (Strict SSE)
+        if request.query_params.get("sessionId"):
+            return MCPMessagesResponse()
+        
+        # Fallback: Stateless JSON-RPC (HTTP Transport style)
+        try:
+            payload = await request.json()
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid JSON")
+        
+        jsonrpc = payload.get("jsonrpc")
+        method = payload.get("method")
+        params = payload.get("params", {})
+        msg_id = payload.get("id")
+        
+        if not method:
+            raise HTTPException(status_code=400, detail="Missing method")
+
+        result = None
+        error = None
+        
+        try:
+            if method == "initialize":
+                result = {
+                    "protocolVersion": "2024-11-05",
+                    "capabilities": mcp.get_capabilities(),
+                    "serverInfo": {"name": "hair-omakase", "version": "0.1.0"}
+                }
+            elif method == "notifications/initialized":
+                # Just ack
+                return Response(status_code=200)
+            elif method == "ping":
+                result = {}
+            elif method == "tools/list":
+                tools = await mcp.list_tools()
+                # Serialize Pydantic models
+                result = {"tools": [t.model_dump() for t in tools]}
+            elif method == "tools/call":
+                name = params.get("name")
+                args = params.get("arguments", {})
+                tool_result = await mcp.call_tool(name, args)
+                # Tool result is usually a list of Content objects
+                result = {"content": [c.model_dump() for c in tool_result]}
+            else:
+                error = {"code": -32601, "message": "Method not found"}
+
+        except Exception as e:
+            error = {"code": -32603, "message": str(e)}
+
+        response_body = {
+            "jsonrpc": "2.0",
+            "id": msg_id,
+        }
+        if error:
+            response_body["error"] = error
+        else:
+            response_body["result"] = result
+            
+        return JSONResponse(content=response_body)
+
     return Response(status_code=405)
 
 # Keep /messages as alias just in case
