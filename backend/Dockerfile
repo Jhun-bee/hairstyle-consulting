@@ -17,4 +17,4 @@ RUN mkdir -p uploads results
 EXPOSE 8080
 
 # Run MCP server
-CMD ["python", "mcp_server.py"]
+CMD ["python", "mcp_server.py", "--transport", "sse"]

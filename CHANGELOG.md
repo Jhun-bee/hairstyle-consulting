@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.8] - 2026-01-17
+
+### 🐛 Fixed
+- **Docker**: `--transport sse` 명시적 지정 (Dockerfile CMD 수정)
+- **Dependency**: `sse-starlette` 재추가 (SSE 모드 필수 의존성 보장)
+
+---
+
 ## [v0.6.7] - 2026-01-17
 
 ### ♻️ Refactor
