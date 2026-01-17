@@ -4,6 +4,13 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.2] - 2026-01-17
+
+### 🐛 Fixed
+- **Railway Deployment**: `PORT` 환경변수 지원 (동적 포트 바인딩)
+
+---
+
 ## [v0.6.1] - 2026-01-17
 
 ### 🔧 Fixed
