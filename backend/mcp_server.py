@@ -267,8 +267,9 @@ async def health_check():
     }
 
 # Mount MCP Server to FastAPI app
-# This automatically adds /sse and /messages endpoints
-mcp.mount(app)
+# mcp.http_app() returns the underlying Starlette/FastAPI app configured by FastMCP
+mcp_app = mcp.http_app()
+app.mount("/", mcp_app)
 
 # Run the server
 if __name__ == "__main__":

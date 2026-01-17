@@ -4,6 +4,13 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.6] - 2026-01-17
+
+### ♻️ Refactor
+- **MCP Server**: `mcp.http_app()` 기반 마운팅 적용 (올바른 FastMCP 통합 방식)
+
+---
+
 ## [v0.6.5] - 2026-01-17
 
 ### ♻️ Refactor
