@@ -4,6 +4,19 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.7.0] - 2026-01-18
+
+### ♻️ Major Refactor
+- **MCP Server**: `fastapi-mcp` 라이브러리 기반으로 완전 재작성
+- **새 엔드포인트**: `/mcp` (기존 `/sse` 대신)
+- **Pydantic 모델**: 모든 요청/응답에 스키마 정의
+- **자동 MCP 변환**: FastAPI 엔드포인트가 자동으로 MCP 도구로 노출
+
+### 📦 Dependencies
+- `fastmcp` → `fastapi-mcp>=0.4.0` 변경
+
+---
+
 ## [v0.6.19] - 2026-01-18
 
 ### ♻️ Refactor

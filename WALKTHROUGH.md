@@ -189,3 +189,35 @@ async def sse_event_generator(session_id: str, base_url: str):
 
 **Version**: `v0.6.19`
 
+---
+
+## FastAPI-MCP Complete Rewrite (v0.7.0)
+
+**Goal**: PlayMCP 연결 문제 해결을 위해 `fastapi-mcp` 라이브러리로 완전 재작성
+
+### 수정 내용
+- **fastapi-mcp 라이브러리 도입**: 검증된 MCP 구현 사용
+- **새 MCP 엔드포인트**: `/mcp` (자동 생성됨)
+- **Pydantic 모델**: 모든 요청/응답에 타입 정의
+- **자동 도구 노출**: FastAPI 엔드포인트가 자동으로 MCP 도구로 변환
+
+### 기술 구현
+```python
+from fastapi import FastAPI
+from fastapi_mcp import FastApiMCP
+
+app = FastAPI()
+mcp = FastApiMCP(app)
+mcp.mount()  # MCP 서버가 /mcp에 마운트됨
+```
+
+### MCP 도구 목록
+- `GET /styles`: 헤어스타일 목록 조회
+- `POST /analyze-face`: 얼굴 분석
+- `POST /recommend-styles`: 스타일 추천
+- `POST /generate-hairstyle`: 가상 피팅 이미지 생성
+
+### Verification
+- PlayMCP에서 **`https://hairstyle-consulting-production.up.railway.app/mcp`**로 등록 테스트
+
+**Version**: `v0.7.0`
