@@ -276,8 +276,11 @@ async def health_check():
 async def sse_event_generator(session_id: str, base_url: str):
     """Generate SSE events for MCP protocol"""
     # Send endpoint event first (required by PlayMCP)
+    # IMPORTANT: data must be JSON format with "uri" key
+    import json
     endpoint_uri = f"{base_url}/sse?sessionId={session_id}"
-    yield f"event: endpoint\ndata: {endpoint_uri}\n\n"
+    endpoint_data = json.dumps({"uri": endpoint_uri})
+    yield f"event: endpoint\ndata: {endpoint_data}\n\n"
     
     # Keep connection alive with periodic pings
     try:
