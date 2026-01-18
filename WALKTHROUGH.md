@@ -130,3 +130,62 @@ original_img = original_img.convert('RGB') # Fix for RGBA/Palette images
 - Railway 배포 후 PlayMCP 등록 재시도 예정
 
 **Version**: `v0.6.16`
+
+---
+
+## MCP tools/list Handler Fix (v0.6.17)
+
+**Goal**: `tools/list` 호출 시 발생하는 `'function' object is not iterable` 오류 수정
+
+### 수정 내용
+- `mcp._mcp_server.list_tools()` 호출 방식 변경
+- FastMCP 내부 구조 `_tool_manager`, `_tools`에서 도구 목록 추출 시도
+- 실패 시 하드코딩된 4개 도구 정보 반환 (fallback)
+
+**Version**: `v0.6.17`
+
+---
+
+## Streamable HTTP Transport (v0.6.18)
+
+**Goal**: SSE 타임아웃 문제 해결을 위해 Streamable HTTP로 전환 시도
+
+### 수정 내용
+- GET /sse → 즉시 JSON 응답 반환 (SSE 스트림 대신)
+- tools/list에 완전한 inputSchema 포함
+- tools/call → 직접 함수 호출 방식
+
+### 결과
+- PlayMCP에서 "일시적인 오류" 발생
+- PlayMCP가 진짜 SSE 스트리밍을 요구함을 확인
+
+**Version**: `v0.6.18`
+
+---
+
+## Proper SSE Streaming for PlayMCP (v0.6.19)
+
+**Goal**: PlayMCP 호환을 위한 진짜 SSE 스트리밍 구현
+
+### 수정 내용
+- **GET /sse**: `text/event-stream` Content-Type 반환
+- **`endpoint` 이벤트**: 첫 번째로 전송, 메시지 URI 포함 (`/sse?sessionId=...`)
+- **keepalive**: 30초마다 핑 전송으로 연결 유지
+- **POST /sse**: JSON-RPC 메시지 처리 유지
+
+### 기술 구현
+```python
+async def sse_event_generator(session_id: str, base_url: str):
+    endpoint_uri = f"{base_url}/sse?sessionId={session_id}"
+    yield f"event: endpoint\ndata: {endpoint_uri}\n\n"
+    
+    while True:
+        await asyncio.sleep(30)
+        yield f": keepalive\n\n"
+```
+
+### Verification
+- Railway 배포 후 PlayMCP 등록 테스트 중
+
+**Version**: `v0.6.19`
+
