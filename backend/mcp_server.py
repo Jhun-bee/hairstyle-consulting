@@ -293,8 +293,10 @@ async def handle_sse_get(request: Request):
     session_id = str(uuid.uuid4())
     sessions[session_id] = {"created": True}
     
-    # Get base URL from request
+    # Get base URL from request and force HTTPS (Railway proxy uses HTTPS)
     base_url = str(request.base_url).rstrip("/")
+    if base_url.startswith("http://"):
+        base_url = base_url.replace("http://", "https://", 1)
     
     return StreamingResponse(
         sse_event_generator(session_id, base_url),
