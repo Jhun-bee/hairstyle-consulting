@@ -4,6 +4,16 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.18] - 2026-01-18
+
+### ♻️ Refactor
+- **MCP Server**: SSE → **Streamable HTTP Transport** 전환 (PlayMCP 호환성 해결)
+- **GET /sse**: SSE 스트림 대신 즉시 JSON 응답 반환 (연결 확인 타임아웃 해결)
+- **tools/list**: 완전한 inputSchema 포함한 도구 정의 제공
+- **tools/call**: 직접 도구 함수 호출 방식으로 변경
+
+---
+
 ## [v0.6.17] - 2026-01-18
 
 ### 🐛 Fixed

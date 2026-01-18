@@ -233,19 +233,14 @@ async def generate_hairstyle(image_base64: str, style_name: str, gender: str = "
         }
 
 
-
-
 # ------------------------------------------------------------------------------
-# PlayMCP Integration (Manual FastAPI + SseServerTransport)
+# PlayMCP Integration (Streamable HTTP Transport - NO SSE)
 # ------------------------------------------------------------------------------
 import uvicorn
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from mcp.server.sse import SseServerTransport
 from starlette.responses import Response
-import mcp.types as types
-from pydantic import ValidationError
 
 # Create FastAPI app
 app = FastAPI(title="Hair Omakase MCP Server")
@@ -259,55 +254,49 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize SSE Transport
-# Advertise /sse as the endpoint for messages as well
-sse = SseServerTransport("/sse")
-
 @app.api_route("/", methods=["GET", "POST"])
 async def health_check():
     """Root endpoint for health check"""
     return {
         "status": "healthy",
         "service": "Hair Omakase MCP Server",
+        "version": "0.6.18",
+        "transport": "streamable-http",
         "endpoints": {
-            "sse": "/sse",
-            "messages": "/sse"
+            "mcp": "/sse"
         }
     }
 
-class MCPSSEResponse(Response):
-    """Custom Response to handle SSE connection via ASGI"""
-    async def __call__(self, scope, receive, send):
-        async with sse.connect_sse(scope, receive, send) as streams:
-            await mcp._mcp_server.run(
-                streams[0], 
-                streams[1], 
-                mcp._mcp_server.create_initialization_options()
-            )
-
-class MCPMessagesResponse(Response):
-    """Custom Response to handle Messages via ASGI"""
-    async def __call__(self, scope, receive, send):
-        await sse.handle_post_message(scope, receive, send)
-
 @app.api_route("/sse", methods=["GET", "POST"])
-async def handle_sse_coalesced(request: Request):
-    """Combined SSE Endpoint (GET for Stream, POST for Messages/Stateless)"""
+async def handle_mcp(request: Request):
+    """
+    Streamable HTTP Transport Endpoint
+    - GET: Returns server capabilities (for connection check)
+    - POST: Handles JSON-RPC requests
+    """
     if request.method == "GET":
-        return MCPSSEResponse()
+        # Streamable HTTP: Return immediate response for connection check
+        return JSONResponse(content={
+            "jsonrpc": "2.0",
+            "result": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {
+                    "tools": {"listChanged": True}
+                },
+                "serverInfo": {
+                    "name": "hair-omakase",
+                    "version": "0.6.18"
+                }
+            }
+        })
     
     elif request.method == "POST":
-        # Check for Session ID (Strict SSE)
-        if request.query_params.get("sessionId"):
-            return MCPMessagesResponse()
-        
-        # Fallback: Stateless JSON-RPC (HTTP Transport style)
+        # Handle JSON-RPC requests
         try:
             payload = await request.json()
         except Exception:
             raise HTTPException(status_code=400, detail="Invalid JSON")
         
-        jsonrpc = payload.get("jsonrpc")
         method = payload.get("method")
         params = payload.get("params", {})
         msg_id = payload.get("id")
@@ -322,59 +311,89 @@ async def handle_sse_coalesced(request: Request):
             if method == "initialize":
                 result = {
                     "protocolVersion": "2024-11-05",
-                    "capabilities": mcp._mcp_server.get_capabilities(
-                        notification_options=mcp._mcp_server.notification_options,
-                        experimental_capabilities={}
-                    ).model_dump(),
-                    "serverInfo": {"name": "hair-omakase", "version": "0.1.0"}
+                    "capabilities": {
+                        "tools": {"listChanged": True},
+                        "prompts": {"listChanged": True},
+                        "resources": {"subscribe": False, "listChanged": True}
+                    },
+                    "serverInfo": {"name": "hair-omakase", "version": "0.6.18"}
                 }
             elif method == "notifications/initialized":
-                # Just ack
                 return Response(status_code=200)
             elif method == "ping":
                 result = {}
             elif method == "tools/list":
-                # FastMCP stores tools in _tool_manager
-                try:
-                    # Try to get tools from tool manager
-                    if hasattr(mcp, '_tool_manager') and hasattr(mcp._tool_manager, 'list_tools'):
-                        tools = mcp._tool_manager.list_tools()
-                    elif hasattr(mcp, '_tools'):
-                        # Direct access to tools dict
-                        tools = list(mcp._tools.values())
-                    else:
-                        # Fallback: manually build tool info from decorated functions
-                        tools = []
-                        for tool_name in ['get_available_styles', 'analyze_face', 'recommend_styles', 'generate_hairstyle']:
-                            tools.append({
-                                "name": tool_name,
-                                "description": f"Hair Omakase {tool_name} tool"
-                            })
-                    
-                    # Handle both Pydantic models and dicts
-                    tool_list = []
-                    for t in tools:
-                        if hasattr(t, 'model_dump'):
-                            tool_list.append(t.model_dump())
-                        elif isinstance(t, dict):
-                            tool_list.append(t)
-                        else:
-                            tool_list.append({"name": str(t)})
-                    result = {"tools": tool_list}
-                except Exception as e:
-                    # Ultimate fallback
-                    result = {"tools": [
-                        {"name": "get_available_styles", "description": "헤어스타일 목록 조회"},
-                        {"name": "analyze_face", "description": "AI 얼굴 분석"},
-                        {"name": "recommend_styles", "description": "맞춤 스타일 추천"},
-                        {"name": "generate_hairstyle", "description": "가상 피팅 이미지 생성"}
-                    ]}
+                # Return hardcoded tool definitions with full schema
+                result = {"tools": [
+                    {
+                        "name": "get_available_styles",
+                        "description": "사용 가능한 헤어스타일 목록을 조회합니다.",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "gender": {"type": "string", "enum": ["male", "female", "all"], "default": "all"}
+                            }
+                        }
+                    },
+                    {
+                        "name": "analyze_face",
+                        "description": "사용자 얼굴을 분석하여 얼굴형, 피부톤, 현재 헤어 상태를 파악합니다.",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "image_base64": {"type": "string", "description": "base64로 인코딩된 이미지 데이터"}
+                            },
+                            "required": ["image_base64"]
+                        }
+                    },
+                    {
+                        "name": "recommend_styles",
+                        "description": "얼굴 분석 결과를 기반으로 맞춤 헤어스타일을 추천합니다.",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "face_shape": {"type": "string"},
+                                "skin_tone": {"type": "string"},
+                                "hair_length": {"type": "string"},
+                                "hair_texture": {"type": "string"},
+                                "gender": {"type": "string", "default": "all"}
+                            },
+                            "required": ["face_shape", "skin_tone", "hair_length", "hair_texture"]
+                        }
+                    },
+                    {
+                        "name": "generate_hairstyle",
+                        "description": "선택한 헤어스타일을 적용한 가상 피팅 이미지를 생성합니다.",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "image_base64": {"type": "string"},
+                                "style_name": {"type": "string"},
+                                "gender": {"type": "string", "default": "female"}
+                            },
+                            "required": ["image_base64", "style_name"]
+                        }
+                    }
+                ]}
             elif method == "tools/call":
                 name = params.get("name")
                 args = params.get("arguments", {})
-                tool_result = await mcp._mcp_server.call_tool(name, args)
-                # Tool result is usually a list of Content objects
-                result = {"content": [c.model_dump() for c in tool_result]}
+                
+                # Call the actual tool function
+                if name == "get_available_styles":
+                    tool_result = get_available_styles(**args)
+                elif name == "analyze_face":
+                    tool_result = await analyze_face(**args)
+                elif name == "recommend_styles":
+                    tool_result = await recommend_styles(**args)
+                elif name == "generate_hairstyle":
+                    tool_result = await generate_hairstyle(**args)
+                else:
+                    error = {"code": -32601, "message": f"Tool not found: {name}"}
+                    tool_result = None
+                
+                if tool_result is not None:
+                    result = {"content": [{"type": "text", "text": str(tool_result)}]}
             else:
                 error = {"code": -32601, "message": "Method not found"}
 
@@ -394,15 +413,9 @@ async def handle_sse_coalesced(request: Request):
 
     return Response(status_code=405)
 
-# Keep /messages as alias just in case
-@app.post("/messages")
-async def handle_messages():
-    """Messages Endpoint (Alias)"""
-    return MCPMessagesResponse()
-
 # Run the server
 if __name__ == "__main__":
-    # Railway sets the PORT environment variable
     import os
     port = int(os.environ.get("PORT", 8080))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
