@@ -2,20 +2,20 @@
 Hair Omakase MCP Server
 AI 헤어 컨설팅 서비스를 MCP 도구로 제공합니다.
 
-PlayMCP 공모전 출품용
+PlayMCP 공모전 출품용 - v0.7.0 (fastapi-mcp 기반)
 """
 
-from fastmcp import FastMCP
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi_mcp import FastApiMCP
+from pydantic import BaseModel, Field
+from typing import Optional, List
 import os
 import json
 import base64
-import httpx
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# Initialize MCP Server
-mcp = FastMCP("hair-omakase")
 
 # Load styles database
 BACKEND_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -29,17 +29,87 @@ with open(STYLES_JSON_PATH, "r", encoding="utf-8") as f:
 from app.services.gemini_client import GeminiClient
 gemini_client = GeminiClient()
 
+# ========================================
+# FastAPI App
+# ========================================
+app = FastAPI(
+    title="Hair Omakase MCP Server",
+    description="AI 헤어 컨설팅 서비스 - 얼굴 분석, 스타일 추천, 가상 피팅",
+    version="0.7.0"
+)
 
-@mcp.tool()
-def get_available_styles(gender: str = "all") -> list:
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ========================================
+# Pydantic Models
+# ========================================
+class StyleInfo(BaseModel):
+    id: str
+    name: str
+    tags: List[str] = []
+    description: str = ""
+
+class AnalyzeFaceRequest(BaseModel):
+    image_base64: str = Field(..., description="base64로 인코딩된 이미지 데이터")
+
+class AnalyzeFaceResponse(BaseModel):
+    face_shape: str
+    skin_tone: str
+    hair_length: str
+    hair_texture: str
+    hair_color: str
+    feature_summary: str
+    image_id: Optional[str] = None
+    error: Optional[str] = None
+
+class RecommendStylesRequest(BaseModel):
+    face_shape: str = Field(..., description="얼굴형 (계란형, 둥근형, 각진형 등)")
+    skin_tone: str = Field(..., description="피부톤 (웜톤, 쿨톤 등)")
+    hair_length: str = Field(..., description="현재 머리 기장")
+    hair_texture: str = Field(..., description="모질 (직모, 곱슬 등)")
+    gender: str = Field(default="all", description="성별 필터 (male, female, all)")
+
+class RecommendStylesResponse(BaseModel):
+    recommendations: List[dict]
+    consultant_comment: str
+
+class GenerateHairstyleRequest(BaseModel):
+    image_base64: str = Field(..., description="base64로 인코딩된 원본 이미지")
+    style_name: str = Field(..., description="적용할 헤어스타일 이름")
+    gender: str = Field(default="female", description="성별 (male, female)")
+
+class GenerateHairstyleResponse(BaseModel):
+    success: bool
+    style_applied: str
+    result_image_base64: Optional[str] = None
+    error: Optional[str] = None
+
+# ========================================
+# API Endpoints (MCP Tools로 자동 변환됨)
+# ========================================
+
+@app.get("/", summary="Health Check")
+async def health_check():
+    """서버 상태를 확인합니다."""
+    return {
+        "status": "healthy",
+        "service": "Hair Omakase MCP Server",
+        "version": "0.7.0"
+    }
+
+@app.get("/styles", summary="Get Available Styles", response_model=List[StyleInfo])
+async def get_available_styles(gender: str = "all"):
     """
     사용 가능한 헤어스타일 목록을 조회합니다.
     
-    Args:
-        gender: 성별 필터 ("male", "female", "all")
-    
-    Returns:
-        스타일 목록 (id, name, tags, thumbnail_url)
+    - **gender**: 성별 필터 ("male", "female", "all")
     """
     if gender == "male":
         filtered = [s for s in STYLES_DB if s['id'].startswith('m_')]
@@ -48,35 +118,27 @@ def get_available_styles(gender: str = "all") -> list:
     else:
         filtered = STYLES_DB
     
-    # Return simplified style info
     return [
-        {
-            "id": s["id"],
-            "name": s["name"],
-            "tags": s.get("tags", []),
-            "description": s.get("prompt_modifier", "")[:100]
-        }
+        StyleInfo(
+            id=s["id"],
+            name=s["name"],
+            tags=s.get("tags", []),
+            description=s.get("prompt_modifier", "")[:100]
+        )
         for s in filtered
     ]
 
-
-@mcp.tool()
-async def analyze_face(image_base64: str) -> dict:
+@app.post("/analyze-face", summary="Analyze Face", response_model=AnalyzeFaceResponse)
+async def analyze_face(request: AnalyzeFaceRequest):
     """
     사용자 얼굴을 분석하여 얼굴형, 피부톤, 현재 헤어 상태를 파악합니다.
     
-    Args:
-        image_base64: base64로 인코딩된 이미지 데이터
-    
-    Returns:
-        분석 결과 (face_shape, skin_tone, hair_length, hair_texture, hair_color, feature_summary)
+    - **image_base64**: base64로 인코딩된 이미지 데이터
     """
-    import tempfile
     import uuid
     
-    # Decode base64 image and save temporarily
     try:
-        image_data = base64.b64decode(image_base64)
+        image_data = base64.b64decode(request.image_base64)
         temp_filename = f"temp_{uuid.uuid4().hex}.jpg"
         temp_path = os.path.join(BACKEND_ROOT, "uploads", temp_filename)
         
@@ -85,66 +147,43 @@ async def analyze_face(image_base64: str) -> dict:
         with open(temp_path, "wb") as f:
             f.write(image_data)
         
-        # Analyze using Gemini
         result = await gemini_client.analyze_face(temp_path)
-        
-        # Add temp file reference for later use
         result["image_id"] = temp_filename
         
-        return result
+        return AnalyzeFaceResponse(**result)
         
     except Exception as e:
-        return {
-            "error": str(e),
-            "face_shape": "Unknown",
-            "skin_tone": "Unknown",
-            "hair_length": "Unknown",
-            "hair_texture": "Unknown",
-            "hair_color": "Unknown",
-            "feature_summary": "분석 중 오류가 발생했습니다."
-        }
+        return AnalyzeFaceResponse(
+            error=str(e),
+            face_shape="Unknown",
+            skin_tone="Unknown",
+            hair_length="Unknown",
+            hair_texture="Unknown",
+            hair_color="Unknown",
+            feature_summary="분석 중 오류가 발생했습니다."
+        )
 
-
-@mcp.tool()
-async def recommend_styles(
-    face_shape: str,
-    skin_tone: str,
-    hair_length: str,
-    hair_texture: str,
-    gender: str = "all"
-) -> dict:
+@app.post("/recommend-styles", summary="Recommend Styles", response_model=RecommendStylesResponse)
+async def recommend_styles(request: RecommendStylesRequest):
     """
     얼굴 분석 결과를 기반으로 맞춤 헤어스타일을 추천합니다.
-    
-    Args:
-        face_shape: 얼굴형 (계란형, 둥근형, 각진형 등)
-        skin_tone: 피부톤 (웜톤, 쿨톤 등)
-        hair_length: 현재 머리 기장
-        hair_texture: 모질 (직모, 곱슬 등)
-        gender: 성별 필터 ("male", "female", "all")
-    
-    Returns:
-        추천 스타일 3개와 전문가 코멘트
     """
-    # Build analysis dict
     analysis = {
-        "face_shape": face_shape,
-        "skin_tone": skin_tone,
-        "hair_length": hair_length,
-        "hair_texture": hair_texture,
+        "face_shape": request.face_shape,
+        "skin_tone": request.skin_tone,
+        "hair_length": request.hair_length,
+        "hair_texture": request.hair_texture,
         "hair_color": "Unknown",
-        "feature_summary": f"{face_shape} 얼굴형, {skin_tone} 피부"
+        "feature_summary": f"{request.face_shape} 얼굴형, {request.skin_tone} 피부"
     }
     
-    # Filter styles by gender
-    if gender == "male":
+    if request.gender == "male":
         filtered_styles = [s for s in STYLES_DB if s['id'].startswith('m_')]
-    elif gender == "female":
+    elif request.gender == "female":
         filtered_styles = [s for s in STYLES_DB if s['id'].startswith('w_')]
     else:
         filtered_styles = STYLES_DB
     
-    # Get recommendations from Gemini
     try:
         rec_result = await gemini_client.recommend_styles_with_llm(analysis, filtered_styles)
         
@@ -158,38 +197,26 @@ async def recommend_styles(
                     "tags": style.get("tags", [])
                 })
         
-        return {
-            "recommendations": recommendations,
-            "consultant_comment": rec_result.get('comment', rec_result.get('consultant_comment', "추천 스타일입니다."))
-        }
+        return RecommendStylesResponse(
+            recommendations=recommendations,
+            consultant_comment=rec_result.get('comment', rec_result.get('consultant_comment', "추천 스타일입니다."))
+        )
     except Exception as e:
-        # Fallback recommendations
         fallback = filtered_styles[:3] if len(filtered_styles) >= 3 else filtered_styles
-        return {
-            "recommendations": [{"id": s["id"], "name": s["name"], "tags": s.get("tags", [])} for s in fallback],
-            "consultant_comment": f"기본 추천 스타일입니다. (오류: {str(e)})"
-        }
+        return RecommendStylesResponse(
+            recommendations=[{"id": s["id"], "name": s["name"], "tags": s.get("tags", [])} for s in fallback],
+            consultant_comment=f"기본 추천 스타일입니다. (오류: {str(e)})"
+        )
 
-
-@mcp.tool()
-async def generate_hairstyle(image_base64: str, style_name: str, gender: str = "female") -> dict:
+@app.post("/generate-hairstyle", summary="Generate Hairstyle", response_model=GenerateHairstyleResponse)
+async def generate_hairstyle(request: GenerateHairstyleRequest):
     """
     선택한 헤어스타일을 적용한 가상 피팅 이미지를 생성합니다.
-    
-    Args:
-        image_base64: base64로 인코딩된 원본 이미지
-        style_name: 적용할 헤어스타일 이름 (예: "레이어드 컷", "투블럭")
-        gender: 성별 ("male", "female")
-    
-    Returns:
-        생성된 이미지 (base64)
     """
-    import tempfile
     import uuid
     
     try:
-        # Decode and save input image
-        image_data = base64.b64decode(image_base64)
+        image_data = base64.b64decode(request.image_base64)
         temp_filename = f"input_{uuid.uuid4().hex}.jpg"
         temp_path = os.path.join(BACKEND_ROOT, "uploads", temp_filename)
         
@@ -199,255 +226,47 @@ async def generate_hairstyle(image_base64: str, style_name: str, gender: str = "
         with open(temp_path, "wb") as f:
             f.write(image_data)
         
-        # Generate using Gemini
         result_id, result_url = gemini_client.generate_quick_fitting_hairstyle(
             original_image_path=temp_path,
-            style_description=style_name,
-            gender=gender
+            style_description=request.style_name,
+            gender=request.gender
         )
         
-        # Read result image and convert to base64
         result_path = os.path.join(BACKEND_ROOT, "results", f"{result_id}.jpg")
         
         if os.path.exists(result_path):
             with open(result_path, "rb") as f:
                 result_base64 = base64.b64encode(f.read()).decode('utf-8')
             
-            return {
-                "success": True,
-                "style_applied": style_name,
-                "result_image_base64": result_base64
-            }
-        else:
-            return {
-                "success": False,
-                "error": "Generated image not found",
-                "style_applied": style_name
-            }
-            
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e),
-            "style_applied": style_name
-        }
-
-
-# ------------------------------------------------------------------------------
-# PlayMCP Integration (SSE Transport with endpoint event)
-# ------------------------------------------------------------------------------
-import uvicorn
-import uuid
-import asyncio
-import json
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.responses import Response, StreamingResponse
-
-# Create FastAPI app
-app = FastAPI(title="Hair Omakase MCP Server")
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Store active sessions
-sessions = {}
-
-@app.api_route("/", methods=["GET", "POST"])
-async def health_check():
-    """Root endpoint for health check"""
-    return {
-        "status": "healthy",
-        "service": "Hair Omakase MCP Server",
-        "version": "0.6.19",
-        "transport": "sse",
-        "endpoints": {
-            "sse": "/sse"
-        }
-    }
-
-async def sse_event_generator(session_id: str, base_url: str):
-    """Generate SSE events for MCP protocol"""
-    # Send endpoint event first (required by PlayMCP)
-    # IMPORTANT: data must be JSON format with "uri" key
-    import json
-    endpoint_uri = f"{base_url}/sse?sessionId={session_id}"
-    endpoint_data = json.dumps({"uri": endpoint_uri})
-    yield f"event: endpoint\ndata: {endpoint_data}\n\n"
-    
-    # Keep connection alive with periodic pings
-    try:
-        while True:
-            await asyncio.sleep(30)
-            yield f": keepalive\n\n"
-    except asyncio.CancelledError:
-        pass
-
-@app.get("/sse")
-async def handle_sse_get(request: Request):
-    """SSE Stream Endpoint - Returns text/event-stream with endpoint event"""
-    session_id = str(uuid.uuid4())
-    sessions[session_id] = {"created": True}
-    
-    # Get base URL from request and force HTTPS (Railway proxy uses HTTPS)
-    base_url = str(request.base_url).rstrip("/")
-    if base_url.startswith("http://"):
-        base_url = base_url.replace("http://", "https://", 1)
-    
-    return StreamingResponse(
-        sse_event_generator(session_id, base_url),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"
-        }
-    )
-
-@app.post("/sse")
-async def handle_sse_post(request: Request):
-    """Handle JSON-RPC messages via POST"""
-    try:
-        payload = await request.json()
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid JSON")
-    
-    method = payload.get("method")
-    params = payload.get("params", {})
-    msg_id = payload.get("id")
-    
-    if not method:
-        raise HTTPException(status_code=400, detail="Missing method")
-
-    result = None
-    error = None
-    
-    try:
-        if method == "initialize":
-            session_id = str(uuid.uuid4())
-            result = {
-                "protocolVersion": "2024-11-05",
-                "capabilities": {
-                    "tools": {"listChanged": True},
-                    "prompts": {"listChanged": True},
-                    "resources": {"subscribe": False, "listChanged": True}
-                },
-                "serverInfo": {"name": "hair-omakase", "version": "0.6.22"}
-            }
-            # Return with required MCP headers
-            return JSONResponse(
-                content={
-                    "jsonrpc": "2.0",
-                    "id": msg_id,
-                    "result": result
-                },
-                headers={
-                    "Mcp-Session-Id": session_id,
-                    "MCP-Protocol-Version": "2024-11-05"
-                }
+            return GenerateHairstyleResponse(
+                success=True,
+                style_applied=request.style_name,
+                result_image_base64=result_base64
             )
-        elif method == "notifications/initialized":
-            return Response(status_code=200)
-        elif method == "ping":
-            result = {}
-        elif method == "tools/list":
-            result = {"tools": [
-                {
-                    "name": "get_available_styles",
-                    "description": "사용 가능한 헤어스타일 목록을 조회합니다.",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "gender": {"type": "string", "enum": ["male", "female", "all"], "default": "all"}
-                        }
-                    }
-                },
-                {
-                    "name": "analyze_face",
-                    "description": "사용자 얼굴을 분석하여 얼굴형, 피부톤, 현재 헤어 상태를 파악합니다.",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "image_base64": {"type": "string", "description": "base64로 인코딩된 이미지 데이터"}
-                        },
-                        "required": ["image_base64"]
-                    }
-                },
-                {
-                    "name": "recommend_styles",
-                    "description": "얼굴 분석 결과를 기반으로 맞춤 헤어스타일을 추천합니다.",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "face_shape": {"type": "string"},
-                            "skin_tone": {"type": "string"},
-                            "hair_length": {"type": "string"},
-                            "hair_texture": {"type": "string"},
-                            "gender": {"type": "string", "default": "all"}
-                        },
-                        "required": ["face_shape", "skin_tone", "hair_length", "hair_texture"]
-                    }
-                },
-                {
-                    "name": "generate_hairstyle",
-                    "description": "선택한 헤어스타일을 적용한 가상 피팅 이미지를 생성합니다.",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "image_base64": {"type": "string"},
-                            "style_name": {"type": "string"},
-                            "gender": {"type": "string", "default": "female"}
-                        },
-                        "required": ["image_base64", "style_name"]
-                    }
-                }
-            ]}
-        elif method == "tools/call":
-            name = params.get("name")
-            args = params.get("arguments", {})
-            
-            if name == "get_available_styles":
-                tool_result = get_available_styles(**args)
-            elif name == "analyze_face":
-                tool_result = await analyze_face(**args)
-            elif name == "recommend_styles":
-                tool_result = await recommend_styles(**args)
-            elif name == "generate_hairstyle":
-                tool_result = await generate_hairstyle(**args)
-            else:
-                error = {"code": -32601, "message": f"Tool not found: {name}"}
-                tool_result = None
-            
-            if tool_result is not None:
-                result = {"content": [{"type": "text", "text": json.dumps(tool_result, ensure_ascii=False)}]}
         else:
-            error = {"code": -32601, "message": "Method not found"}
-
+            return GenerateHairstyleResponse(
+                success=False,
+                error="Generated image not found",
+                style_applied=request.style_name
+            )
+            
     except Exception as e:
-        error = {"code": -32603, "message": str(e)}
+        return GenerateHairstyleResponse(
+            success=False,
+            error=str(e),
+            style_applied=request.style_name
+        )
 
-    response_body = {
-        "jsonrpc": "2.0",
-        "id": msg_id,
-    }
-    if error:
-        response_body["error"] = error
-    else:
-        response_body["result"] = result
-        
-    return JSONResponse(content=response_body)
+# ========================================
+# FastAPI-MCP 설정
+# ========================================
+mcp = FastApiMCP(app)
+mcp.mount()
 
-# Run the server
+# ========================================
+# 서버 실행
+# ========================================
 if __name__ == "__main__":
-    import os
+    import uvicorn
     port = int(os.environ.get("PORT", 8080))
     uvicorn.run(app, host="0.0.0.0", port=port)
-
-
