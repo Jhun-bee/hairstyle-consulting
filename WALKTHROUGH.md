@@ -107,3 +107,26 @@ original_img = original_img.convert('RGB') # Fix for RGBA/Palette images
 3. 심사 요청 → 공모전 응모
 
 **Version**: `v0.6.0`
+
+---
+
+## MCP Server Bug Fix & Presentation Mode (v0.6.16)
+
+**Goal**: PlayMCP 연결 실패 버그 수정 + 발표 자료 페이지 복원
+
+### 수정 내용
+
+**버그 수정**:
+- `backend/mcp_server.py` 337번 줄의 `list_tools()` 호출에서 `await` 제거  
+  → `list_tools()`는 coroutine이 아니므로 await 불필요
+- PlayMCP Stateless JSON-RPC 핸들러 안정화
+
+**기능 복원**:
+- `frontend/src/pages/PresentationPage.tsx` 복원 (발표용 슬라이드 8장)
+- `frontend/src/App.tsx`에 Presentation Mode 라우팅 추가 (`/presentation`)
+
+### Verification
+- `tools/list` JSON-RPC 호출 정상 동작 확인
+- Railway 배포 후 PlayMCP 등록 재시도 예정
+
+**Version**: `v0.6.16`

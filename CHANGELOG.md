@@ -4,6 +4,17 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.16] - 2026-01-18
+
+### 🐛 Fixed
+- **MCP Server**: `tools/list` 호출 시 발생하던 async/await 버그 수정 (`list_tools()`는 coroutine이 아니므로 await 제거)
+- **PlayMCP 호환성**: Stateless JSON-RPC 핸들러 안정화
+
+### ✨ Added
+- **Presentation Mode**: Hair Omakase 발표용 슬라이드 페이지 (`/presentation`) 복원
+
+---
+
 ## [v0.6.15] - 2026-01-17
 
 ### 🐛 Fixed

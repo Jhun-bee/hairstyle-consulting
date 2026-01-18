@@ -334,7 +334,7 @@ async def handle_sse_coalesced(request: Request):
             elif method == "ping":
                 result = {}
             elif method == "tools/list":
-                tools = await mcp._mcp_server.list_tools()
+                tools = mcp._mcp_server.list_tools()
                 # Serialize Pydantic models
                 result = {"tools": [t.model_dump() for t in tools]}
             elif method == "tools/call":
