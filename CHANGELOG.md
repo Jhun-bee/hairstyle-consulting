@@ -4,6 +4,15 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.19] - 2026-01-18
+
+### ♻️ Refactor
+- **MCP Server**: 진짜 SSE 스트리밍 구현 (PlayMCP 호환)
+- **GET /sse**: `text/event-stream` 반환, `endpoint` 이벤트 전송 (메시지 URI 포함)
+- **keepalive**: 30초마다 keepalive 핑 전송으로 연결 유지
+
+---
+
 ## [v0.6.18] - 2026-01-18
 
 ### ♻️ Refactor

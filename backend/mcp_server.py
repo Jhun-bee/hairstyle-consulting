@@ -234,13 +234,16 @@ async def generate_hairstyle(image_base64: str, style_name: str, gender: str = "
 
 
 # ------------------------------------------------------------------------------
-# PlayMCP Integration (Streamable HTTP Transport - NO SSE)
+# PlayMCP Integration (SSE Transport with endpoint event)
 # ------------------------------------------------------------------------------
 import uvicorn
+import uuid
+import asyncio
+import json
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.responses import Response
+from starlette.responses import Response, StreamingResponse
 
 # Create FastAPI app
 app = FastAPI(title="Hair Omakase MCP Server")
@@ -254,168 +257,179 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Store active sessions
+sessions = {}
+
 @app.api_route("/", methods=["GET", "POST"])
 async def health_check():
     """Root endpoint for health check"""
     return {
         "status": "healthy",
         "service": "Hair Omakase MCP Server",
-        "version": "0.6.18",
-        "transport": "streamable-http",
+        "version": "0.6.19",
+        "transport": "sse",
         "endpoints": {
-            "mcp": "/sse"
+            "sse": "/sse"
         }
     }
 
-@app.api_route("/sse", methods=["GET", "POST"])
-async def handle_mcp(request: Request):
-    """
-    Streamable HTTP Transport Endpoint
-    - GET: Returns server capabilities (for connection check)
-    - POST: Handles JSON-RPC requests
-    """
-    if request.method == "GET":
-        # Streamable HTTP: Return immediate response for connection check
-        return JSONResponse(content={
-            "jsonrpc": "2.0",
-            "result": {
+async def sse_event_generator(session_id: str, base_url: str):
+    """Generate SSE events for MCP protocol"""
+    # Send endpoint event first (required by PlayMCP)
+    endpoint_uri = f"{base_url}/sse?sessionId={session_id}"
+    yield f"event: endpoint\ndata: {endpoint_uri}\n\n"
+    
+    # Keep connection alive with periodic pings
+    try:
+        while True:
+            await asyncio.sleep(30)
+            yield f": keepalive\n\n"
+    except asyncio.CancelledError:
+        pass
+
+@app.get("/sse")
+async def handle_sse_get(request: Request):
+    """SSE Stream Endpoint - Returns text/event-stream with endpoint event"""
+    session_id = str(uuid.uuid4())
+    sessions[session_id] = {"created": True}
+    
+    # Get base URL from request
+    base_url = str(request.base_url).rstrip("/")
+    
+    return StreamingResponse(
+        sse_event_generator(session_id, base_url),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
+@app.post("/sse")
+async def handle_sse_post(request: Request):
+    """Handle JSON-RPC messages via POST"""
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+    
+    method = payload.get("method")
+    params = payload.get("params", {})
+    msg_id = payload.get("id")
+    
+    if not method:
+        raise HTTPException(status_code=400, detail="Missing method")
+
+    result = None
+    error = None
+    
+    try:
+        if method == "initialize":
+            result = {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {
-                    "tools": {"listChanged": True}
+                    "tools": {"listChanged": True},
+                    "prompts": {"listChanged": True},
+                    "resources": {"subscribe": False, "listChanged": True}
                 },
-                "serverInfo": {
-                    "name": "hair-omakase",
-                    "version": "0.6.18"
-                }
+                "serverInfo": {"name": "hair-omakase", "version": "0.6.19"}
             }
-        })
-    
-    elif request.method == "POST":
-        # Handle JSON-RPC requests
-        try:
-            payload = await request.json()
-        except Exception:
-            raise HTTPException(status_code=400, detail="Invalid JSON")
-        
-        method = payload.get("method")
-        params = payload.get("params", {})
-        msg_id = payload.get("id")
-        
-        if not method:
-            raise HTTPException(status_code=400, detail="Missing method")
-
-        result = None
-        error = None
-        
-        try:
-            if method == "initialize":
-                result = {
-                    "protocolVersion": "2024-11-05",
-                    "capabilities": {
-                        "tools": {"listChanged": True},
-                        "prompts": {"listChanged": True},
-                        "resources": {"subscribe": False, "listChanged": True}
-                    },
-                    "serverInfo": {"name": "hair-omakase", "version": "0.6.18"}
-                }
-            elif method == "notifications/initialized":
-                return Response(status_code=200)
-            elif method == "ping":
-                result = {}
-            elif method == "tools/list":
-                # Return hardcoded tool definitions with full schema
-                result = {"tools": [
-                    {
-                        "name": "get_available_styles",
-                        "description": "사용 가능한 헤어스타일 목록을 조회합니다.",
-                        "inputSchema": {
-                            "type": "object",
-                            "properties": {
-                                "gender": {"type": "string", "enum": ["male", "female", "all"], "default": "all"}
-                            }
-                        }
-                    },
-                    {
-                        "name": "analyze_face",
-                        "description": "사용자 얼굴을 분석하여 얼굴형, 피부톤, 현재 헤어 상태를 파악합니다.",
-                        "inputSchema": {
-                            "type": "object",
-                            "properties": {
-                                "image_base64": {"type": "string", "description": "base64로 인코딩된 이미지 데이터"}
-                            },
-                            "required": ["image_base64"]
-                        }
-                    },
-                    {
-                        "name": "recommend_styles",
-                        "description": "얼굴 분석 결과를 기반으로 맞춤 헤어스타일을 추천합니다.",
-                        "inputSchema": {
-                            "type": "object",
-                            "properties": {
-                                "face_shape": {"type": "string"},
-                                "skin_tone": {"type": "string"},
-                                "hair_length": {"type": "string"},
-                                "hair_texture": {"type": "string"},
-                                "gender": {"type": "string", "default": "all"}
-                            },
-                            "required": ["face_shape", "skin_tone", "hair_length", "hair_texture"]
-                        }
-                    },
-                    {
-                        "name": "generate_hairstyle",
-                        "description": "선택한 헤어스타일을 적용한 가상 피팅 이미지를 생성합니다.",
-                        "inputSchema": {
-                            "type": "object",
-                            "properties": {
-                                "image_base64": {"type": "string"},
-                                "style_name": {"type": "string"},
-                                "gender": {"type": "string", "default": "female"}
-                            },
-                            "required": ["image_base64", "style_name"]
+        elif method == "notifications/initialized":
+            return Response(status_code=200)
+        elif method == "ping":
+            result = {}
+        elif method == "tools/list":
+            result = {"tools": [
+                {
+                    "name": "get_available_styles",
+                    "description": "사용 가능한 헤어스타일 목록을 조회합니다.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "gender": {"type": "string", "enum": ["male", "female", "all"], "default": "all"}
                         }
                     }
-                ]}
-            elif method == "tools/call":
-                name = params.get("name")
-                args = params.get("arguments", {})
-                
-                # Call the actual tool function
-                if name == "get_available_styles":
-                    tool_result = get_available_styles(**args)
-                elif name == "analyze_face":
-                    tool_result = await analyze_face(**args)
-                elif name == "recommend_styles":
-                    tool_result = await recommend_styles(**args)
-                elif name == "generate_hairstyle":
-                    tool_result = await generate_hairstyle(**args)
-                else:
-                    error = {"code": -32601, "message": f"Tool not found: {name}"}
-                    tool_result = None
-                
-                if tool_result is not None:
-                    result = {"content": [{"type": "text", "text": str(tool_result)}]}
-            else:
-                error = {"code": -32601, "message": "Method not found"}
-
-        except Exception as e:
-            error = {"code": -32603, "message": str(e)}
-
-        response_body = {
-            "jsonrpc": "2.0",
-            "id": msg_id,
-        }
-        if error:
-            response_body["error"] = error
-        else:
-            response_body["result"] = result
+                },
+                {
+                    "name": "analyze_face",
+                    "description": "사용자 얼굴을 분석하여 얼굴형, 피부톤, 현재 헤어 상태를 파악합니다.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "image_base64": {"type": "string", "description": "base64로 인코딩된 이미지 데이터"}
+                        },
+                        "required": ["image_base64"]
+                    }
+                },
+                {
+                    "name": "recommend_styles",
+                    "description": "얼굴 분석 결과를 기반으로 맞춤 헤어스타일을 추천합니다.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "face_shape": {"type": "string"},
+                            "skin_tone": {"type": "string"},
+                            "hair_length": {"type": "string"},
+                            "hair_texture": {"type": "string"},
+                            "gender": {"type": "string", "default": "all"}
+                        },
+                        "required": ["face_shape", "skin_tone", "hair_length", "hair_texture"]
+                    }
+                },
+                {
+                    "name": "generate_hairstyle",
+                    "description": "선택한 헤어스타일을 적용한 가상 피팅 이미지를 생성합니다.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "image_base64": {"type": "string"},
+                            "style_name": {"type": "string"},
+                            "gender": {"type": "string", "default": "female"}
+                        },
+                        "required": ["image_base64", "style_name"]
+                    }
+                }
+            ]}
+        elif method == "tools/call":
+            name = params.get("name")
+            args = params.get("arguments", {})
             
-        return JSONResponse(content=response_body)
+            if name == "get_available_styles":
+                tool_result = get_available_styles(**args)
+            elif name == "analyze_face":
+                tool_result = await analyze_face(**args)
+            elif name == "recommend_styles":
+                tool_result = await recommend_styles(**args)
+            elif name == "generate_hairstyle":
+                tool_result = await generate_hairstyle(**args)
+            else:
+                error = {"code": -32601, "message": f"Tool not found: {name}"}
+                tool_result = None
+            
+            if tool_result is not None:
+                result = {"content": [{"type": "text", "text": json.dumps(tool_result, ensure_ascii=False)}]}
+        else:
+            error = {"code": -32601, "message": "Method not found"}
 
-    return Response(status_code=405)
+    except Exception as e:
+        error = {"code": -32603, "message": str(e)}
+
+    response_body = {
+        "jsonrpc": "2.0",
+        "id": msg_id,
+    }
+    if error:
+        response_body["error"] = error
+    else:
+        response_body["result"] = result
+        
+    return JSONResponse(content=response_body)
 
 # Run the server
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 8080))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
 
