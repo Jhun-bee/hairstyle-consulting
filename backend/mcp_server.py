@@ -261,7 +261,7 @@ async def generate_hairstyle(request: GenerateHairstyleRequest):
 # FastAPI-MCP 설정
 # ========================================
 mcp = FastApiMCP(app)
-mcp.mount_sse()  # SSE transport 사용 (deprecated mount() 대신)
+mcp.mount_http()  # Streamable HTTP transport 사용 (POST 지원)
 
 # ========================================
 # 서버 실행
