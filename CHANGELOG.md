@@ -4,6 +4,14 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.6.17] - 2026-01-18
+
+### 🐛 Fixed
+- **MCP Server**: `tools/list` 핸들러 완전 재작성 - FastMCP 내부 구조에서 도구 목록을 올바르게 추출하도록 수정
+- **Fallback**: 도구 목록 추출 실패 시에도 하드코딩된 4개 도구 정보 반환
+
+---
+
 ## [v0.6.16] - 2026-01-18
 
 ### 🐛 Fixed

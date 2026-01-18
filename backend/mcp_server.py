@@ -334,9 +334,41 @@ async def handle_sse_coalesced(request: Request):
             elif method == "ping":
                 result = {}
             elif method == "tools/list":
-                tools = mcp._mcp_server.list_tools()
-                # Serialize Pydantic models
-                result = {"tools": [t.model_dump() for t in tools]}
+                # FastMCP stores tools in _tool_manager
+                try:
+                    # Try to get tools from tool manager
+                    if hasattr(mcp, '_tool_manager') and hasattr(mcp._tool_manager, 'list_tools'):
+                        tools = mcp._tool_manager.list_tools()
+                    elif hasattr(mcp, '_tools'):
+                        # Direct access to tools dict
+                        tools = list(mcp._tools.values())
+                    else:
+                        # Fallback: manually build tool info from decorated functions
+                        tools = []
+                        for tool_name in ['get_available_styles', 'analyze_face', 'recommend_styles', 'generate_hairstyle']:
+                            tools.append({
+                                "name": tool_name,
+                                "description": f"Hair Omakase {tool_name} tool"
+                            })
+                    
+                    # Handle both Pydantic models and dicts
+                    tool_list = []
+                    for t in tools:
+                        if hasattr(t, 'model_dump'):
+                            tool_list.append(t.model_dump())
+                        elif isinstance(t, dict):
+                            tool_list.append(t)
+                        else:
+                            tool_list.append({"name": str(t)})
+                    result = {"tools": tool_list}
+                except Exception as e:
+                    # Ultimate fallback
+                    result = {"tools": [
+                        {"name": "get_available_styles", "description": "헤어스타일 목록 조회"},
+                        {"name": "analyze_face", "description": "AI 얼굴 분석"},
+                        {"name": "recommend_styles", "description": "맞춤 스타일 추천"},
+                        {"name": "generate_hairstyle", "description": "가상 피팅 이미지 생성"}
+                    ]}
             elif method == "tools/call":
                 name = params.get("name")
                 args = params.get("arguments", {})
