@@ -35,7 +35,7 @@ gemini_client = GeminiClient()
 app = FastAPI(
     title="Hair Omakase MCP Server",
     description="AI 헤어 컨설팅 서비스 - 얼굴 분석, 스타일 추천, 가상 피팅",
-    version="0.7.0"
+    version="0.7.1"
 )
 
 # Add CORS middleware

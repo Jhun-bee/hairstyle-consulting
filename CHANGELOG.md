@@ -4,6 +4,13 @@ All notable changes to **Hair Omakase** will be documented in this file.
 
 ---
 
+## [v0.7.1] - 2026-01-18
+
+### 🐛 Fixed
+- **MCP Server**: `mount()` → `mount_sse()` 변경 (deprecation warning 해결)
+
+---
+
 ## [v0.7.0] - 2026-01-18
 
 ### ♻️ Major Refactor

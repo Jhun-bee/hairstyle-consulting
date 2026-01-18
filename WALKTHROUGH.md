@@ -221,3 +221,23 @@ mcp.mount()  # MCP 서버가 /mcp에 마운트됨
 - PlayMCP에서 **`https://hairstyle-consulting-production.up.railway.app/mcp`**로 등록 테스트
 
 **Version**: `v0.7.0`
+
+---
+
+## mount_sse() Fix (v0.7.1)
+
+**Goal**: fastapi-mcp deprecation warning 해결
+
+### 수정 내용
+- `mount()` → `mount_sse()` 변경
+- `mount()`는 deprecated, SSE transport는 `mount_sse()` 사용 필요
+
+```python
+# Before
+mcp.mount()  # deprecated!
+
+# After
+mcp.mount_sse()  # SSE transport 명시적 사용
+```
+
+**Version**: `v0.7.1`
