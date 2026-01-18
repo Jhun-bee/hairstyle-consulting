@@ -331,6 +331,7 @@ async def handle_sse_post(request: Request):
     
     try:
         if method == "initialize":
+            session_id = str(uuid.uuid4())
             result = {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {
@@ -338,8 +339,20 @@ async def handle_sse_post(request: Request):
                     "prompts": {"listChanged": True},
                     "resources": {"subscribe": False, "listChanged": True}
                 },
-                "serverInfo": {"name": "hair-omakase", "version": "0.6.19"}
+                "serverInfo": {"name": "hair-omakase", "version": "0.6.22"}
             }
+            # Return with required MCP headers
+            return JSONResponse(
+                content={
+                    "jsonrpc": "2.0",
+                    "id": msg_id,
+                    "result": result
+                },
+                headers={
+                    "Mcp-Session-Id": session_id,
+                    "MCP-Protocol-Version": "2024-11-05"
+                }
+            )
         elif method == "notifications/initialized":
             return Response(status_code=200)
         elif method == "ping":
