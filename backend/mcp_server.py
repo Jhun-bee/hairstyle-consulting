@@ -70,6 +70,58 @@ def validate_and_resize_image(image_base64: str) -> tuple[bytes, str]:
     img.save(output, format='JPEG', quality=85)
     return output.getvalue(), None
 
+def download_image_from_url(image_url: str) -> tuple[bytes, str]:
+    """
+    URL에서 이미지를 다운로드합니다.
+    
+    Returns:
+        (image_bytes, error_message)
+        성공 시 error_message는 None
+    """
+    import httpx
+    
+    if not image_url or not image_url.startswith(('http://', 'https://')):
+        return None, "올바른 이미지 URL을 입력해주세요. (http:// 또는 https://로 시작)"
+    
+    try:
+        with httpx.Client(timeout=30.0) as client:
+            response = client.get(image_url)
+            response.raise_for_status()
+            
+            # Content-Type 확인
+            content_type = response.headers.get('content-type', '')
+            if not any(img_type in content_type for img_type in ['image/', 'octet-stream']):
+                return None, f"URL이 이미지가 아닙니다. (Content-Type: {content_type})"
+            
+            image_data = response.content
+            
+            # 이미지 검증 및 리사이즈
+            try:
+                img = Image.open(io.BytesIO(image_data))
+                img.verify()
+                img = Image.open(io.BytesIO(image_data))
+                
+                # 리사이즈
+                if img.width > MAX_IMAGE_SIZE or img.height > MAX_IMAGE_SIZE:
+                    img.thumbnail((MAX_IMAGE_SIZE, MAX_IMAGE_SIZE), Image.Resampling.LANCZOS)
+                
+                if img.mode in ('RGBA', 'P'):
+                    img = img.convert('RGB')
+                
+                output = io.BytesIO()
+                img.save(output, format='JPEG', quality=85)
+                return output.getvalue(), None
+                
+            except Exception as e:
+                return None, f"URL의 이미지를 처리할 수 없습니다: {str(e)}"
+                
+    except httpx.TimeoutException:
+        return None, "이미지 다운로드 시간 초과. 다른 URL을 시도해주세요."
+    except httpx.HTTPStatusError as e:
+        return None, f"이미지 다운로드 실패: HTTP {e.response.status_code}"
+    except Exception as e:
+        return None, f"이미지 URL 처리 오류: {str(e)}"
+
 # Load styles database
 BACKEND_ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BACKEND_ROOT, "app", "data")
@@ -88,7 +140,7 @@ gemini_client = GeminiClient()
 app = FastAPI(
     title="Hair Omakase MCP Server",
     description="AI 헤어 컨설팅 서비스 - 얼굴 분석, 스타일 추천, 가상 피팅",
-    version="0.7.3"
+    version="0.7.4"
 )
 
 # Add CORS middleware
@@ -110,7 +162,8 @@ class StyleInfo(BaseModel):
     description: str = ""
 
 class AnalyzeFaceRequest(BaseModel):
-    image_base64: str = Field(..., description="base64로 인코딩된 이미지 데이터")
+    image_base64: Optional[str] = Field(default=None, description="base64로 인코딩된 이미지 데이터 (image_url과 둘 중 하나 필수)")
+    image_url: Optional[str] = Field(default=None, description="이미지 URL (image_base64와 둘 중 하나 필수)")
 
 class AnalyzeFaceResponse(BaseModel):
     face_shape: str
@@ -134,7 +187,8 @@ class RecommendStylesResponse(BaseModel):
     consultant_comment: str
 
 class GenerateHairstyleRequest(BaseModel):
-    image_base64: str = Field(..., description="base64로 인코딩된 원본 이미지")
+    image_base64: Optional[str] = Field(default=None, description="base64로 인코딩된 원본 이미지 (image_url과 둘 중 하나 필수)")
+    image_url: Optional[str] = Field(default=None, description="이미지 URL (image_base64와 둘 중 하나 필수)")
     style_name: str = Field(..., description="적용할 헤어스타일 이름")
     gender: str = Field(default="female", description="성별 (male, female)")
 
@@ -186,12 +240,23 @@ async def analyze_face(request: AnalyzeFaceRequest):
     """
     사용자 얼굴을 분석하여 얼굴형, 피부톤, 현재 헤어 상태를 파악합니다.
     
-    - **image_base64**: base64로 인코딩된 이미지 데이터
+    - **image_base64**: base64로 인코딩된 이미지 데이터 (image_url과 둘 중 하나 필수)
+    - **image_url**: 이미지 URL (image_base64와 둘 중 하나 필수)
     """
     import uuid
     
-    # 이미지 검증 및 리사이즈
-    image_data, error_msg = validate_and_resize_image(request.image_base64)
+    # 이미지 가져오기 (URL 또는 base64)
+    image_data = None
+    error_msg = None
+    
+    if request.image_url:
+        # URL에서 이미지 다운로드
+        image_data, error_msg = download_image_from_url(request.image_url)
+    elif request.image_base64:
+        # base64에서 이미지 변환
+        image_data, error_msg = validate_and_resize_image(request.image_base64)
+    else:
+        error_msg = "image_url 또는 image_base64 중 하나를 입력해주세요."
     
     if error_msg:
         return AnalyzeFaceResponse(
@@ -278,11 +343,26 @@ async def recommend_styles(request: RecommendStylesRequest):
 async def generate_hairstyle(request: GenerateHairstyleRequest):
     """
     선택한 헤어스타일을 적용한 가상 피팅 이미지를 생성합니다.
+    
+    - **image_base64**: base64로 인코딩된 이미지 (image_url과 둘 중 하나 필수)
+    - **image_url**: 이미지 URL (image_base64와 둘 중 하나 필수)
+    - **style_name**: 적용할 헤어스타일 이름
+    - **gender**: 성별 (male, female)
     """
     import uuid
     
-    # 이미지 검증 및 리사이즈
-    image_data, error_msg = validate_and_resize_image(request.image_base64)
+    # 이미지 가져오기 (URL 또는 base64)
+    image_data = None
+    error_msg = None
+    
+    if request.image_url:
+        # URL에서 이미지 다운로드
+        image_data, error_msg = download_image_from_url(request.image_url)
+    elif request.image_base64:
+        # base64에서 이미지 변환
+        image_data, error_msg = validate_and_resize_image(request.image_base64)
+    else:
+        error_msg = "image_url 또는 image_base64 중 하나를 입력해주세요."
     
     if error_msg:
         return GenerateHairstyleResponse(
