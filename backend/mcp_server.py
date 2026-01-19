@@ -13,9 +13,62 @@ from typing import Optional, List
 import os
 import json
 import base64
+import io
 from dotenv import load_dotenv
+from PIL import Image
 
 load_dotenv()
+
+# ========================================
+# 이미지 헬퍼 함수
+# ========================================
+MAX_IMAGE_SIZE = 1024  # 최대 1024x1024
+
+def validate_and_resize_image(image_base64: str) -> tuple[bytes, str]:
+    """
+    base64 이미지를 검증하고 필요시 리사이즈합니다.
+    
+    Returns:
+        (image_bytes, error_message)
+        성공 시 error_message는 None
+    """
+    # base64 데이터 검증
+    if not image_base64 or len(image_base64) < 100:
+        return None, "이미지 데이터가 너무 작습니다. 올바른 이미지를 업로드해주세요."
+    
+    # base64가 잘렸는지 확인 (패딩 체크)
+    try:
+        # 패딩 보정
+        padding = 4 - (len(image_base64) % 4)
+        if padding != 4:
+            image_base64 += "=" * padding
+        
+        image_data = base64.b64decode(image_base64)
+    except Exception as e:
+        return None, f"이미지 데이터가 손상되었습니다. 더 작은 이미지를 사용해주세요. (base64 디코딩 오류)"
+    
+    # 이미지 유효성 검증
+    try:
+        img = Image.open(io.BytesIO(image_data))
+        img.verify()  # 이미지 무결성 검증
+        # verify 후 다시 열어야 함
+        img = Image.open(io.BytesIO(image_data))
+    except Exception as e:
+        return None, f"이미지를 열 수 없습니다. 이미지가 손상되었거나 지원하지 않는 형식입니다. 더 작은 이미지를 업로드해주세요."
+    
+    # 이미지 리사이즈 (너무 크면)
+    if img.width > MAX_IMAGE_SIZE or img.height > MAX_IMAGE_SIZE:
+        # 비율 유지하며 리사이즈
+        img.thumbnail((MAX_IMAGE_SIZE, MAX_IMAGE_SIZE), Image.Resampling.LANCZOS)
+    
+    # RGB로 변환 (PNG 등은 RGBA일 수 있음)
+    if img.mode in ('RGBA', 'P'):
+        img = img.convert('RGB')
+    
+    # JPEG로 저장
+    output = io.BytesIO()
+    img.save(output, format='JPEG', quality=85)
+    return output.getvalue(), None
 
 # Load styles database
 BACKEND_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +88,7 @@ gemini_client = GeminiClient()
 app = FastAPI(
     title="Hair Omakase MCP Server",
     description="AI 헤어 컨설팅 서비스 - 얼굴 분석, 스타일 추천, 가상 피팅",
-    version="0.7.1"
+    version="0.7.3"
 )
 
 # Add CORS middleware
@@ -137,8 +190,21 @@ async def analyze_face(request: AnalyzeFaceRequest):
     """
     import uuid
     
+    # 이미지 검증 및 리사이즈
+    image_data, error_msg = validate_and_resize_image(request.image_base64)
+    
+    if error_msg:
+        return AnalyzeFaceResponse(
+            error=error_msg,
+            face_shape="분석 실패",
+            skin_tone="분석 실패",
+            hair_length="분석 실패",
+            hair_texture="분석 실패",
+            hair_color="분석 실패",
+            feature_summary=error_msg
+        )
+    
     try:
-        image_data = base64.b64decode(request.image_base64)
         temp_filename = f"temp_{uuid.uuid4().hex}.jpg"
         temp_path = os.path.join(BACKEND_ROOT, "uploads", temp_filename)
         
@@ -154,13 +220,13 @@ async def analyze_face(request: AnalyzeFaceRequest):
         
     except Exception as e:
         return AnalyzeFaceResponse(
-            error=str(e),
-            face_shape="Unknown",
-            skin_tone="Unknown",
-            hair_length="Unknown",
-            hair_texture="Unknown",
-            hair_color="Unknown",
-            feature_summary="분석 중 오류가 발생했습니다."
+            error=f"얼굴 분석 중 오류: {str(e)}",
+            face_shape="분석 실패",
+            skin_tone="분석 실패",
+            hair_length="분석 실패",
+            hair_texture="분석 실패",
+            hair_color="분석 실패",
+            feature_summary="얼굴 분석 중 오류가 발생했습니다. 다시 시도해주세요."
         )
 
 @app.post("/recommend-styles", summary="Recommend Styles", response_model=RecommendStylesResponse)
@@ -215,8 +281,17 @@ async def generate_hairstyle(request: GenerateHairstyleRequest):
     """
     import uuid
     
+    # 이미지 검증 및 리사이즈
+    image_data, error_msg = validate_and_resize_image(request.image_base64)
+    
+    if error_msg:
+        return GenerateHairstyleResponse(
+            success=False,
+            error=error_msg,
+            style_applied=request.style_name
+        )
+    
     try:
-        image_data = base64.b64decode(request.image_base64)
         temp_filename = f"input_{uuid.uuid4().hex}.jpg"
         temp_path = os.path.join(BACKEND_ROOT, "uploads", temp_filename)
         
@@ -246,14 +321,14 @@ async def generate_hairstyle(request: GenerateHairstyleRequest):
         else:
             return GenerateHairstyleResponse(
                 success=False,
-                error="Generated image not found",
+                error="이미지 생성에 실패했습니다. 다시 시도해주세요.",
                 style_applied=request.style_name
             )
             
     except Exception as e:
         return GenerateHairstyleResponse(
             success=False,
-            error=str(e),
+            error=f"헤어스타일 생성 중 오류: {str(e)}",
             style_applied=request.style_name
         )
 
