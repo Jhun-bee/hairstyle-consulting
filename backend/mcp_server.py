@@ -140,7 +140,7 @@ gemini_client = GeminiClient()
 app = FastAPI(
     title="Hair Omakase MCP Server",
     description="AI 헤어 컨설팅 서비스 - 얼굴 분석, 스타일 추천, 가상 피팅",
-    version="0.7.4"
+    version="0.7.5"
 )
 
 # Add CORS middleware
@@ -195,7 +195,8 @@ class GenerateHairstyleRequest(BaseModel):
 class GenerateHairstyleResponse(BaseModel):
     success: bool
     style_applied: str
-    result_image_base64: Optional[str] = None
+    result_image_url: Optional[str] = None  # 이미지 URL (권장)
+    result_image_base64: Optional[str] = None  # base64 (캐시/로컬 전용)
     error: Optional[str] = None
 
 # ========================================
@@ -208,9 +209,19 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "Hair Omakase MCP Server",
-        "version": "0.7.0"
+        "version": "0.7.5"
     }
 
+# 생성된 이미지 서빙
+from fastapi.responses import FileResponse
+
+@app.get("/results/{image_id}", summary="Get Generated Image")
+async def get_result_image(image_id: str):
+    """생성된 헤어스타일 이미지를 가져옵니다."""
+    result_path = os.path.join(BACKEND_ROOT, "results", f"{image_id}.jpg")
+    if os.path.exists(result_path):
+        return FileResponse(result_path, media_type="image/jpeg")
+    return {"error": "Image not found"}
 @app.get("/styles", summary="Get Available Styles", response_model=List[StyleInfo])
 async def get_available_styles(gender: str = "all"):
     """
@@ -390,13 +401,13 @@ async def generate_hairstyle(request: GenerateHairstyleRequest):
         result_path = os.path.join(BACKEND_ROOT, "results", f"{result_id}.jpg")
         
         if os.path.exists(result_path):
-            with open(result_path, "rb") as f:
-                result_base64 = base64.b64encode(f.read()).decode('utf-8')
+            # URL 생성 (base64 대신 URL 반환 - 메시지 길이 제한 회피)
+            result_url = f"https://hairstyle-consulting-production.up.railway.app/results/{result_id}"
             
             return GenerateHairstyleResponse(
                 success=True,
                 style_applied=request.style_name,
-                result_image_base64=result_base64
+                result_image_url=result_url
             )
         else:
             return GenerateHairstyleResponse(
